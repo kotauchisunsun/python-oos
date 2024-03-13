@@ -3,6 +3,7 @@ from method_accessor import PublicMethod,PrivateMethod
 from attr_accessor import PublicAttr,PrivateAttr,ReadonlyAttr
 from class_definitions import ClassDefinitions,Class
 from instance import Instance,InstanceManagement
+from exceptions import MethodAccessDenied
 
 """
 - カプセル化
@@ -16,12 +17,6 @@ from instance import Instance,InstanceManagement
 クラス未定義エラー
 継承
 """
-
-class MethodAccessDenied(Exception):
-    pass
-
-class MethodNotFound(Exception):
-    pass
 
 class InternalObjectOrientedSystem:
     def __init__(self):
