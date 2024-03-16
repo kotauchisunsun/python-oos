@@ -16,7 +16,6 @@ def test_attr() -> None:
     system.make_instance("bank", "my-account", yen=100)
     assert system.send_to("my-account", "get-yen") == 100
 
-
 def test_default_attr_value() -> None:
     system = ObjectOrientedSystem()
     system.def_class(
@@ -29,6 +28,20 @@ def test_default_attr_value() -> None:
     system.make_instance("bank", "my-account")
     assert system.send_to("my-account", "get-yen") == 10
 
+def test_public_attr() -> None:
+    system = ObjectOrientedSystem()
+    system.def_class(
+        "bank",
+        [],
+        [
+            PublicAttr("dollars"),
+        ],
+        lambda sys, this, **args: sys.call(this, "set-dollars", value=args["dollars"]),
+    )
+    system.make_instance("bank", "my-account", dollars=100)
+    assert system.send_to("my-account", "get-dollars") == 100
+    system.send_to("my-account", "set-dollars", value=200)
+    assert system.send_to("my-account", "get-dollars") == 200
 
 def test_private_attr() -> None:
     system = ObjectOrientedSystem()
@@ -45,7 +58,6 @@ def test_private_attr() -> None:
         system.send_to("my-account", "get-dollars")
     with pytest.raises(MethodAccessDenied):
         system.send_to("my-account", "set-dollars")
-
 
 def test_readonly_attr() -> None:
     system = ObjectOrientedSystem()
@@ -301,7 +313,7 @@ def test_inheritance_chain_method() -> None:
     assert system.send_to("my-account", "get-dollars") == 300
 
 
-def test_mixin() -> None:
+def test_multiple_inheritance() -> None:
     system = ObjectOrientedSystem()
     system.def_class(
         "bank",
