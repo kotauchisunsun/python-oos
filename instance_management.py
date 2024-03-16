@@ -21,7 +21,6 @@ class InstanceManagement:
 
     def get_instance(self, instance_name: str) -> Instance:
         for instances in reversed(self.instances):
-            print(instance_name)
             if instance_name in instances:
                 return instances[instance_name]
         raise Exception(f"{instance_name} is not defined")
