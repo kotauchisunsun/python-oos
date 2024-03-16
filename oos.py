@@ -41,7 +41,7 @@ class ObjectOrientedSystem:
     def send(self, instance_name: str, method: str, **argv: MessageType) -> Any:
         instance = self.instance_management.get_instance(instance_name)
 
-        f = instance.class_type.get_method(method)
+        f = instance.get_method(method)
 
         with self.instance_management:
             self.instance_management.register_instance("this", instance)
@@ -54,5 +54,5 @@ class ObjectOrientedSystem:
                 return self.__call(instance, method, **argv)
 
     def __call(self, instance: Instance, method: str, **argv: MessageType) -> Any:
-        f = instance.class_type.get_method(method)
+        f = instance.get_method(method)
         return f.method(self, **argv)

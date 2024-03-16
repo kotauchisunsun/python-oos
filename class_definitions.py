@@ -48,22 +48,6 @@ class Class:
             attrs.update(base.get_default_attr())
         return attrs
 
-    def find_attr_functions(self, name: str) -> Iterable[MethodType]:
-        for attr in self.attrs:
-            getter, setter = build_getter_setter(attr)
-            getter_name = f"get-{attr.name}"
-            setter_name = f"set-{attr.name}"
-            if name == getter_name:
-                yield getter
-                return
-            elif name == setter_name:
-                yield setter
-                return
-        for base in self.bases:
-            for f in base.find_attr_functions(name):
-                yield f
-                return
-
     def find_method(self, name: str) -> Iterable[MethodType]:
         if name in self.methods:
             yield self.methods[name]
@@ -75,8 +59,5 @@ class Class:
 
     def get_method(self, name: str) -> MethodType:
         for f in self.find_method(name):
-            return f
-
-        for f in self.find_attr_functions(name):
             return f
         raise MethodNotFound(f"{name} not found")
