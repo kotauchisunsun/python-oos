@@ -53,6 +53,6 @@ def build_getter_setter(
         PublicAttr: (PublicMethod, PublicMethod),
         PrivateAttr: (PrivateMethod, PrivateMethod),
         ReadonlyAttr: (PublicMethod, PrivateMethod),
-    }
+    }[type(attr)]
 
     return GetterMethodClass(getter), SetterMethodClass(setter)
