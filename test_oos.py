@@ -1,8 +1,9 @@
-from oos import *
+from oos import ObjectOrientedSystem
 import pytest
 from attr_accessor import PublicAttr, PrivateAttr, ReadonlyAttr
 from method_accessor import PublicMethod, PrivateMethod
 from exceptions import MethodAccessDenied
+from typing import Dict, Any
 
 
 def test_attr() -> None:
@@ -11,10 +12,11 @@ def test_attr() -> None:
         "bank",
         [],
         [PublicAttr("yen")],
-        lambda sys, this, **args: sys.call(this, "set-yen", value=args["yen"]),
+        lambda sys, this, **args: sys.send_to("this", "set-yen", value=args["yen"]),
     )
     system.make_instance("bank", "my-account", yen=100)
     assert system.send_to("my-account", "get-yen") == 100
+
 
 def test_default_attr_value() -> None:
     system = ObjectOrientedSystem()
@@ -28,6 +30,7 @@ def test_default_attr_value() -> None:
     system.make_instance("bank", "my-account")
     assert system.send_to("my-account", "get-yen") == 10
 
+
 def test_public_attr() -> None:
     system = ObjectOrientedSystem()
     system.def_class(
@@ -36,12 +39,15 @@ def test_public_attr() -> None:
         [
             PublicAttr("dollars"),
         ],
-        lambda sys, this, **args: sys.call(this, "set-dollars", value=args["dollars"]),
+        lambda sys, this, **args: sys.send_to(
+            "this", "set-dollars", value=args["dollars"]
+        ),
     )
     system.make_instance("bank", "my-account", dollars=100)
     assert system.send_to("my-account", "get-dollars") == 100
     system.send_to("my-account", "set-dollars", value=200)
     assert system.send_to("my-account", "get-dollars") == 200
+
 
 def test_private_attr() -> None:
     system = ObjectOrientedSystem()
@@ -51,7 +57,9 @@ def test_private_attr() -> None:
         [
             PrivateAttr("dollars"),
         ],
-        lambda sys, this, **args: sys.call(this, "set-dollars", value=args["dollars"]),
+        lambda sys, this, **args: sys.send_to(
+            "this", "set-dollars", value=args["dollars"]
+        ),
     )
     system.make_instance("bank", "my-account", dollars=100)
     with pytest.raises(MethodAccessDenied):
@@ -59,13 +67,16 @@ def test_private_attr() -> None:
     with pytest.raises(MethodAccessDenied):
         system.send_to("my-account", "set-dollars")
 
+
 def test_readonly_attr() -> None:
     system = ObjectOrientedSystem()
     system.def_class(
         "bank",
         [],
         [ReadonlyAttr("dollars")],
-        lambda sys, this, **args: sys.call(this, "set-dollars", value=args["dollars"]),
+        lambda sys, this, **args: sys.send_to(
+            "this", "set-dollars", value=args["dollars"]
+        ),
     )
     system.make_instance("bank", "my-account", dollars=100)
     assert system.send_to("my-account", "get-dollars") == 100
@@ -79,20 +90,22 @@ def test_bank() -> None:
         "bank",
         [],
         [PublicAttr("dollars")],
-        lambda sys, this, **args: sys.call(this, "set-dollars", value=args["dollars"]),
+        lambda sys, this, **args: sys.send_to(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={
             "deposit": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this,
+                lambda sys, this, **args: sys.send_to(
+                    "this",
                     "set-dollars",
-                    value=sys.call(this, "get-dollars") + args["value"],
+                    value=sys.send_to("this", "get-dollars") + args["value"],
                 )
             ),
             "withdraw": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this,
+                lambda sys, this, **args: sys.send_to(
+                    "this",
                     "set-dollars",
-                    value=max(0, sys.call(this, "get-dollars") - args["value"]),
+                    value=max(0, sys.send_to("this", "get-dollars") - args["value"]),
                 )
             ),
         },
@@ -110,13 +123,15 @@ def test_public_method() -> None:
         "bank",
         [],
         [PublicAttr("dollars")],
-        lambda sys, this, **args: sys.call(this, "set-dollars", value=args["dollars"]),
+        lambda sys, this, **args: sys.send_to(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={
             "deposit": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this,
+                lambda sys, this, **args: sys.send_to(
+                    "this",
                     "set-dollars",
-                    value=sys.call(this, "get-dollars") + args["value"],
+                    value=sys.send_to("this", "get-dollars") + args["value"],
                 )
             ),
         },
@@ -131,13 +146,15 @@ def test_private_method() -> None:
         "bank",
         [],
         [PublicAttr("dollars")],
-        lambda sys, this, **args: sys.call(this, "set-dollars", value=args["dollars"]),
+        lambda sys, this, **args: sys.send_to(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={
             "deposit": PrivateMethod(
-                lambda sys, this, **args: sys.call(
-                    this,
+                lambda sys, this, **args: sys.send_to(
+                    "this",
                     "set-dollars",
-                    value=sys.call(this, "get-dollars") + args["value"],
+                    value=sys.send_to("this", "get-dollars") + args["value"],
                 )
             ),
         },
@@ -154,26 +171,28 @@ def test_polymorphism() -> None:
         "bank",
         [],
         [PublicAttr("dollars")],
-        lambda sys, this, **args: sys.call(this, "set-dollars", value=args["dollars"]),
+        lambda sys, this, **args: sys.send_to(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={
             "deposit_by_dollar": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this,
+                lambda sys, this, **args: sys.send_to(
+                    "this",
                     "set-dollars",
-                    value=sys.call(this, "get-dollars") + args["value"],
+                    value=sys.send_to("this", "get-dollars") + args["value"],
                 )
             ),
             "withdraw": PrivateMethod(
-                lambda sys, this, **args: sys.call(
-                    this,
+                lambda sys, this, **args: sys.send_to(
+                    "this",
                     "set-dollars",
-                    value=sys.call(this, "get-dollars") - args["value"],
+                    value=sys.send_to("this", "get-dollars") - args["value"],
                 )
             ),
             "send": PublicMethod(
                 lambda sys, this, **args: (
                     sys.send_to(args["to"], "deposit_by_dollar", value=args["amount"]),
-                    sys.call(this, "withdraw", value=args["amount"]),
+                    sys.send_to("this", "withdraw", value=args["amount"]),
                 )
             ),
         },
@@ -182,13 +201,13 @@ def test_polymorphism() -> None:
         "japan_bank",
         [],
         [PublicAttr("yen")],
-        lambda sys, this, **args: sys.call(this, "set-yen", value=args["yen"]),
+        lambda sys, this, **args: sys.send_to("this", "set-yen", value=args["yen"]),
         methods={
             "deposit_by_dollar": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this,
+                lambda sys, this, **args: sys.send_to(
+                    "this",
                     "set-yen",
-                    value=sys.call(this, "get-yen") + args["value"] * 150,
+                    value=sys.send_to("this", "get-yen") + args["value"] * 150,
                 )
             ),
         },
@@ -198,6 +217,11 @@ def test_polymorphism() -> None:
     system.make_instance("japan_bank", "target_yen_bank", yen=500)
 
     system.send_to("source_bank", "send", to="target_dollar_bank", amount=50)
+
+    print(system.send_to("source_bank", "get-dollars"))
+    print(system.send_to("target_dollar_bank", "get-dollars"))
+    print(system.send_to("target_yen_bank", "get-yen"))
+
     assert system.send_to("source_bank", "get-dollars") == 50
     assert system.send_to("target_dollar_bank", "get-dollars") == 250
     system.send_to("source_bank", "send", to="target_yen_bank", amount=50)
@@ -211,7 +235,9 @@ def test_inheritance_getter_setter() -> None:
         "bank",
         [],
         [PublicAttr("dollars")],
-        lambda sys, this, **args: sys.call(this, "set-dollars", value=args["dollars"]),
+        lambda sys, this, **args: sys.send_to(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={},
     )
     system.def_class(
@@ -233,13 +259,15 @@ def test_inheritance_method() -> None:
         "bank",
         [],
         [PublicAttr("dollars")],
-        lambda sys, this, **args: sys.call(this, "set-dollars", value=args["dollars"]),
+        lambda sys, this, **args: sys.send_to(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={
             "deposit_by_dollar": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this,
+                lambda sys, this, **args: sys.send_to(
+                    "this",
                     "set-dollars",
-                    value=sys.call(this, "get-dollars") + args["value"],
+                    value=sys.send_to("this", "get-dollars") + args["value"],
                 )
             ),
         },
@@ -250,8 +278,10 @@ def test_inheritance_method() -> None:
         [PublicAttr("yen")],
         methods={
             "deposit_by_yen": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this, "set-yen", value=sys.call(this, "get-yen") + args["value"]
+                lambda sys, this, **args: sys.send_to(
+                    "this",
+                    "set-yen",
+                    value=sys.send_to("this", "get-yen") + args["value"],
                 )
             ),
         },
@@ -273,10 +303,10 @@ def test_inheritance_chain_method() -> None:
         [PublicAttr("dollars")],
         methods={
             "deposit_by_dollar": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this,
+                lambda sys, this, **args: sys.send_to(
+                    "this",
                     "set-dollars",
-                    value=sys.call(this, "get-dollars") + args["value"],
+                    value=sys.send_to("this", "get-dollars") + args["value"],
                 )
             ),
         },
@@ -287,8 +317,10 @@ def test_inheritance_chain_method() -> None:
         [PublicAttr("yen")],
         methods={
             "deposit_by_yen": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this, "set-yen", value=sys.call(this, "get-yen") + args["value"]
+                lambda sys, this, **args: sys.send_to(
+                    "this",
+                    "set-yen",
+                    value=sys.send_to("this", "get-yen") + args["value"],
                 )
             ),
         },
@@ -299,8 +331,10 @@ def test_inheritance_chain_method() -> None:
         [PublicAttr("franc")],
         methods={
             "deposit_by_franc": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this, "set-franc", value=sys.call(this, "get-franc") + args["value"]
+                lambda sys, this, **args: sys.send_to(
+                    "this",
+                    "set-franc",
+                    value=sys.send_to("this", "get-franc") + args["value"],
                 )
             ),
         },
@@ -321,10 +355,10 @@ def test_multiple_inheritance() -> None:
         [PublicAttr("dollars")],
         methods={
             "deposit_by_dollar": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this,
+                lambda sys, this, **args: sys.send_to(
+                    "this",
                     "set-dollars",
-                    value=sys.call(this, "get-dollars") + args["value"],
+                    value=sys.send_to("this", "get-dollars") + args["value"],
                 )
             ),
         },
@@ -335,8 +369,10 @@ def test_multiple_inheritance() -> None:
         [PublicAttr("yen")],
         methods={
             "deposit_by_yen": PublicMethod(
-                lambda sys, this, **args: sys.call(
-                    this, "set-yen", value=sys.call(this, "get-yen") + args["value"]
+                lambda sys, this, **args: sys.send_to(
+                    "this",
+                    "set-yen",
+                    value=sys.send_to("this", "get-yen") + args["value"],
                 )
             ),
         },
@@ -360,14 +396,14 @@ def test_multiple_inheritance() -> None:
     assert system.send_to("my-account", "get-yen") == 30
 
 
-def test_virtual_bank():
-    def new_bank(dollars):
+def test_virtual_bank() -> None:
+    def new_bank(dollars: int) -> Dict[str, Any]:
         return {"dollars": dollars}
 
-    def deposit(bank, value):
+    def deposit(bank: Dict[str, Any], value: int) -> None:
         bank["dollars"] += value
 
-    def withdraw(bank, value):
+    def withdraw(bank: Dict[str, Any], value: int) -> None:
         bank["dollars"] = max(0, bank["dollars"] - value)
 
     my_account = new_bank(200)

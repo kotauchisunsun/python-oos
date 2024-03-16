@@ -1,18 +1,33 @@
 from class_definitions import Class
-from typing import Dict, Any
+from typing import Dict, Any, List
 from instance import Instance
 
 
 class InstanceManagement:
-    def __init__(self, instances: Dict[str, Instance] = {}) -> None:
-        self.instances = instances
+    def __init__(
+        self,
+    ) -> None:
+        self.instances: List[Dict[str, Instance]] = [{}]
 
     def make_instance(
         self, _class: Class, instance_name: str, **argv: Dict[str, Any]
     ) -> Instance:
         instance = Instance(_class, instance_name, _class.get_default_attr())
-        self.instances[instance_name] = instance
+        self.instances[-1][instance_name] = instance
         return instance
 
+    def register_instance(self, name: str, instance: Instance) -> None:
+        self.instances[-1][name] = instance
+
     def get_instance(self, instance_name: str) -> Instance:
-        return self.instances[instance_name]
+        for instances in reversed(self.instances):
+            print(instance_name)
+            if instance_name in instances:
+                return instances[instance_name]
+        raise Exception(f"{instance_name} is not defined")
+
+    def __enter__(self) -> None:
+        self.instances.append({})
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        self.instances.pop()

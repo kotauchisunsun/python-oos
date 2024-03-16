@@ -9,7 +9,7 @@ MessageType = Any
 
 def build_getter_setter(attr: AttrType) -> tuple[MethodType, MethodType]:
     from instance import Instance
-    from oos import InternalObjectOrientedSystem as System
+    from oos import ObjectOrientedSystem as System
 
     attr_name = attr.name
 
