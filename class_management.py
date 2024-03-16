@@ -1,11 +1,10 @@
 from class_definitions import Class, ClassConstructor
 from attr_accessor import AttrType
 from method_accessor import MethodType
-from typing import List, Dict
 
 
 class ClassManagement:
-    classes: Dict[str, Class]
+    classes: dict[str, Class]
 
     def __init__(self) -> None:
         self.classes = {}
@@ -13,10 +12,10 @@ class ClassManagement:
     def define(
         self,
         name: str,
-        bases: List[Class],
-        fields: List[AttrType],
+        bases: list[Class],
+        fields: list[AttrType],
         constructor: ClassConstructor,
-        methods: Dict[str, MethodType] = {},
+        methods: dict[str, MethodType] = {},
     ) -> None:
         self.classes[name] = Class(name, bases, fields, constructor, methods)
 

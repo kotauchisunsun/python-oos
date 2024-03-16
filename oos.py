@@ -1,11 +1,10 @@
-from dataclasses import dataclass
 from method_accessor import PublicMethod, PrivateMethod, MethodType
 from attr_accessor import AttrType
 from class_management import ClassManagement
 from instance import Instance
 from instance_management import InstanceManagement
 from exceptions import MethodAccessDenied
-from typing import List, Dict, Any
+from typing import Any
 from class_definitions import MessageType, ClassConstructor
 
 
@@ -20,10 +19,10 @@ class ObjectOrientedSystem:
     def def_class(
         self,
         name: str,
-        bases: List[str],
-        fields: List[AttrType],
+        bases: list[str],
+        fields: list[AttrType],
         constructor: ClassConstructor = lambda sys, **args: None,
-        methods: Dict[str, MethodType] = {},
+        methods: dict[str, MethodType] = {},
     ) -> None:
         _bases = [self.class_definitions.get_class(base) for base in bases]
         self.class_definitions.define(name, _bases, fields, constructor, methods)

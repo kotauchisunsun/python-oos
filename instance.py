@@ -1,13 +1,12 @@
-from dataclasses import dataclass
 from attr_accessor import AttrType, PrivateAttr, PublicAttr, ReadonlyAttr
 from class_definitions import Class
-from typing import Dict, Any, Iterable, Tuple
+from typing import Any, Iterable
 from method_accessor import MethodType, PrivateMethod, PublicMethod
 
 
 class Instance:
     def __init__(
-        self, class_type: Class, name: str, attributes: Dict[str, Any]
+        self, class_type: Class, name: str, attributes: dict[str, Any]
     ) -> None:
         self.class_type = class_type
         self.name = name

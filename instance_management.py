@@ -1,5 +1,5 @@
 from class_definitions import Class
-from typing import Dict, Any, List
+from typing import Any
 from instance import Instance
 
 
@@ -7,10 +7,10 @@ class InstanceManagement:
     def __init__(
         self,
     ) -> None:
-        self.instances: List[Dict[str, Instance]] = [{}]
+        self.instances: list[dict[str, Instance]] = [{}]
 
     def make_instance(
-        self, _class: Class, instance_name: str, **argv: Dict[str, Any]
+        self, _class: Class, instance_name: str, **argv: dict[str, Any]
     ) -> Instance:
         instance = Instance(_class, instance_name, _class.get_default_attr())
         self.instances[-1][instance_name] = instance

@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from method_accessor import PublicMethod, PrivateMethod, MethodType
-from attr_accessor import PublicAttr, PrivateAttr, ReadonlyAttr, AttrType
+from method_accessor import MethodType
+from attr_accessor import AttrType
 from exceptions import MethodNotFound
-from typing import Callable, List, Dict, Iterable, Any, Callable
+from typing import Iterable, Any, Callable
 
 MessageType = Any
 ClassConstructor = Callable[..., None]
@@ -11,10 +11,10 @@ ClassConstructor = Callable[..., None]
 @dataclass
 class Class:
     name: str
-    bases: List[Any]
-    attrs: List[AttrType]
+    bases: list[Any]
+    attrs: list[AttrType]
     constructor: ClassConstructor
-    methods: Dict[str, MethodType]
+    methods: dict[str, MethodType]
 
     def get_default_attr(self) -> dict[str, AttrType]:
         attrs = {}
