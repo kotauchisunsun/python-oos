@@ -23,9 +23,7 @@ def test_default_attr_value() -> None:
     system.def_class(
         "bank",
         [],
-        [
-            PublicAttr("yen", 10),
-        ],
+        [PublicAttr("yen", 10)],
     )
     system.make_instance("bank", "my-account")
     assert system.send("my-account", "get-yen") == 10
@@ -36,9 +34,7 @@ def test_public_attr() -> None:
     system.def_class(
         "bank",
         [],
-        [
-            PublicAttr("dollars"),
-        ],
+        [PublicAttr("dollars")],
         lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
     )
     system.make_instance("bank", "my-account", dollars=100)
@@ -52,9 +48,7 @@ def test_private_attr() -> None:
     system.def_class(
         "bank",
         [],
-        [
-            PrivateAttr("dollars"),
-        ],
+        [PrivateAttr("dollars")],
         lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
     )
     system.make_instance("bank", "my-account", dollars=100)

@@ -5,30 +5,6 @@ from exceptions import MethodNotFound
 from typing import Callable, List, Dict, Iterable, Any, Callable
 
 MessageType = Any
-
-
-def build_getter_setter(attr: AttrType) -> tuple[MethodType, MethodType]:
-    from oos import ObjectOrientedSystem as System
-
-    attr_name = attr.name
-
-    def getter(sys: System, **args: Dict[str, Any]) -> Any:
-        return sys.instance_management.get_instance("this").attributes[attr_name]
-
-    def setter(sys: System, **args: Dict[str, Any]) -> None:
-        sys.instance_management.get_instance("this").attributes[attr_name] = args[
-            "value"
-        ]
-
-    GetterMethodClass, SetterMethodClass = {
-        PublicAttr: (PublicMethod, PublicMethod),
-        PrivateAttr: (PrivateMethod, PrivateMethod),
-        ReadonlyAttr: (PublicMethod, PrivateMethod),
-    }[type(attr)]
-
-    return GetterMethodClass(getter), SetterMethodClass(setter)
-
-
 ClassConstructor = Callable[..., None]
 
 
@@ -40,7 +16,7 @@ class Class:
     constructor: ClassConstructor
     methods: Dict[str, MethodType]
 
-    def get_default_attr(self) -> Dict[str, AttrType]:
+    def get_default_attr(self) -> dict[str, AttrType]:
         attrs = {}
         for f in self.attrs:
             attrs[f.name] = f.value

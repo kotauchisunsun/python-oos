@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from attr_accessor import AttrType, PrivateAttr, PublicAttr, ReadonlyAttr
 from class_definitions import Class
-from typing import Dict, Any, Iterable
-
+from typing import Dict, Any, Iterable, Tuple
 from method_accessor import MethodType, PrivateMethod, PublicMethod
 
 
@@ -44,16 +43,16 @@ def build_getter_setter(
 ) -> tuple[MethodType, MethodType]:
     from oos import ObjectOrientedSystem as System
 
-    def getter(sys: System, **args: Dict[str, Any]) -> Any:
+    def getter(sys: System, **args: dict[str, Any]) -> Any:
         return this.attributes[attr.name]
 
-    def setter(sys: System, **args: Dict[str, Any]) -> None:
+    def setter(sys: System, **args: dict[str, Any]) -> None:
         this.attributes[attr.name] = args["value"]
 
     GetterMethodClass, SetterMethodClass = {
         PublicAttr: (PublicMethod, PublicMethod),
         PrivateAttr: (PrivateMethod, PrivateMethod),
         ReadonlyAttr: (PublicMethod, PrivateMethod),
-    }[type(attr)]
+    }
 
     return GetterMethodClass(getter), SetterMethodClass(setter)
