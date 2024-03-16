@@ -22,7 +22,7 @@ class ObjectOrientedSystem:
         name: str,
         bases: List[str],
         fields: List[AttrType],
-        constructor: ClassConstructor = lambda sys, this, **args: None,
+        constructor: ClassConstructor = lambda sys, **args: None,
         methods: Dict[str, MethodType] = {},
     ) -> None:
         _bases = [self.class_definitions.get_class(base) for base in bases]
@@ -35,10 +35,10 @@ class ObjectOrientedSystem:
         instance = self.instance_management.make_instance(_class, instance_name)
         with self.instance_management:
             self.instance_management.register_instance("this", instance)
-            _class.constructor(self, instance, **argv)
+            _class.constructor(self, **argv)
         return instance
 
-    def send_to(self, instance_name: str, method: str, **argv: MessageType) -> Any:
+    def send(self, instance_name: str, method: str, **argv: MessageType) -> Any:
         instance = self.instance_management.get_instance(instance_name)
 
         f = instance.class_type.get_method(method)
@@ -55,4 +55,4 @@ class ObjectOrientedSystem:
 
     def __call(self, instance: Instance, method: str, **argv: MessageType) -> Any:
         f = instance.class_type.get_method(method)
-        return f.method(self, instance, **argv)
+        return f.method(self, **argv)

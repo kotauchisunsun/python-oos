@@ -8,16 +8,17 @@ MessageType = Any
 
 
 def build_getter_setter(attr: AttrType) -> tuple[MethodType, MethodType]:
-    from instance import Instance
     from oos import ObjectOrientedSystem as System
 
     attr_name = attr.name
 
-    def getter(sys: System, this: Instance, **args: Dict[str, Any]) -> Any:
-        return this.attributes[attr_name]
+    def getter(sys: System, **args: Dict[str, Any]) -> Any:
+        return sys.instance_management.get_instance("this").attributes[attr_name]
 
-    def setter(sys: System, this: Instance, **args: Dict[str, Any]) -> None:
-        this.attributes[attr_name] = args["value"]
+    def setter(sys: System, **args: Dict[str, Any]) -> None:
+        sys.instance_management.get_instance("this").attributes[attr_name] = args[
+            "value"
+        ]
 
     GetterMethodClass, SetterMethodClass = {
         PublicAttr: (PublicMethod, PublicMethod),
