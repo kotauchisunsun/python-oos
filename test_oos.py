@@ -3,7 +3,7 @@ import pytest
 from attr_accessor import PublicAttr, PrivateAttr, ReadonlyAttr
 from method_accessor import PublicMethod, PrivateMethod
 from exceptions import MethodAccessDenied
-from typing import Dict, Any
+from typing import Any
 
 
 def test_attr() -> None:
@@ -373,13 +373,13 @@ def test_multiple_inheritance() -> None:
 
 
 def test_virtual_bank() -> None:
-    def new_bank(dollars: int) -> Dict[str, Any]:
+    def new_bank(dollars: int) -> dict[str, Any]:
         return {"dollars": dollars}
 
-    def deposit(bank: Dict[str, Any], value: int) -> None:
+    def deposit(bank: dict[str, Any], value: int) -> None:
         bank["dollars"] += value
 
-    def withdraw(bank: Dict[str, Any], value: int) -> None:
+    def withdraw(bank: dict[str, Any], value: int) -> None:
         bank["dollars"] = max(0, bank["dollars"] - value)
 
     my_account = new_bank(200)
