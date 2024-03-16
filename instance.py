@@ -1,5 +1,5 @@
 from attr_accessor import AttrType, PrivateAttr, PublicAttr, ReadonlyAttr
-from class_definitions import Class
+from class_definitions import Class, ClassInterface
 from typing import Any, Iterable
 from method_accessor import MethodType, PrivateMethod, PublicMethod
 
@@ -19,7 +19,7 @@ class Instance:
 
 
 def find_attr_functions(
-    instance: Instance, class_type: Class, name: str
+    instance: Instance, class_type: ClassInterface, name: str
 ) -> Iterable[MethodType]:
     for attr in class_type.attrs:
         getter, setter = build_getter_setter(instance, attr)

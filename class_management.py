@@ -1,4 +1,5 @@
-from class_definitions import Class, ClassConstructor
+from typing import Sequence
+from class_definitions import Class,ClassInterface, ClassConstructor
 from attr_accessor import AttrType
 from method_accessor import MethodType
 
@@ -12,7 +13,7 @@ class ClassManagement:
     def define(
         self,
         name: str,
-        bases: list[Class],
+        bases: Sequence[ClassInterface],
         fields: list[AttrType],
         constructor: ClassConstructor,
         methods: dict[str, MethodType] = {},

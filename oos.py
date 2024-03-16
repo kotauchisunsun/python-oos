@@ -24,8 +24,8 @@ class ObjectOrientedSystem:
         constructor: ClassConstructor = lambda sys, **args: None,
         methods: dict[str, MethodType] = {},
     ) -> None:
-        _bases = [self.class_definitions.get_class(base) for base in bases]
-        self.class_definitions.define(name, _bases, fields, constructor, methods)
+        base_classes = [self.class_definitions.get_class(base) for base in bases]
+        self.class_definitions.define(name, base_classes, fields, constructor, methods)
 
     def make_instance(
         self, class_name: str, instance_name: str, **argv: MessageType
