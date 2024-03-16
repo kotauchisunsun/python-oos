@@ -3,7 +3,7 @@ import pytest
 from attr_accessor import PublicAttr, PrivateAttr, ReadonlyAttr
 from method_accessor import PublicMethod, PrivateMethod
 from exceptions import MethodAccessDenied
-from typing import Any
+from typing import Any, Callable
 
 
 def test_attr() -> None:
@@ -371,22 +371,22 @@ def test_multiple_inheritance() -> None:
     system.send("my-account", "deposit_by_yen", value=20)
     assert system.send("my-account", "get-yen") == 30
 
-
 def test_virtual_bank() -> None:
     def new_bank(dollars: int) -> dict[str, Any]:
-        return {"dollars": dollars}
-
-    def deposit(bank: dict[str, Any], value: int) -> None:
-        bank["dollars"] += value
-
-    def withdraw(bank: dict[str, Any], value: int) -> None:
-        bank["dollars"] = max(0, bank["dollars"] - value)
-
+        fields: dict[str,Any] = {"dollars": dollars}
+        def deposit(value: int) -> None:
+            fields["dollars"] += value
+        def withdraw(value: int) -> None:
+            fields["dollars"] = max(0, fields["dollars"] - value)
+        fields["deposit"] = deposit
+        fields["withdraw"] = withdraw
+        return fields
+    
     my_account = new_bank(200)
     assert my_account["dollars"] == 200
-    deposit(my_account, 50)
+    my_account["deposit"](50)
     assert my_account["dollars"] == 250
-    withdraw(my_account, 100)
+    my_account["withdraw"](100)
     assert my_account["dollars"] == 150
-    withdraw(my_account, 200)
+    my_account["withdraw"](200)
     assert my_account["dollars"] == 0
