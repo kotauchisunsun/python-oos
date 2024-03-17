@@ -16,6 +16,7 @@ def test_attr() -> None:
         constructor=lambda sys, **args: sys.send("this", "set-yen", value=args["yen"]),
     )
     system.send("env", "new", cls="bank", name="my-account", yen=100)
+    print("====" * 10)
     assert system.send("my-account", "get-yen") == 100
 
 
@@ -253,7 +254,7 @@ def test_inheritance_getter_setter() -> None:
         attrs=[PublicAttr("yen")],
         methods={},
     )
-    system.make_instance("japan_bank", "my-account")
+    system.send("env", "new", cls="japan_bank", name="my-account")
     system.send("my-account", "set-dollars", value=100)
     assert system.send("my-account", "get-dollars") == 100
     system.send("my-account", "set-yen", value=10)
@@ -296,7 +297,7 @@ def test_inheritance_method() -> None:
             ),
         },
     )
-    system.make_instance("japan_bank", "my-account")
+    system.send("env", "new", cls="japan_bank", name="my-account")
     system.send("my-account", "set-dollars", value=100)
     system.send("my-account", "set-yen", value=10)
     system.send("my-account", "deposit_by_dollar", value=200)
@@ -355,7 +356,7 @@ def test_inheritance_chain_method() -> None:
         },
     )
 
-    system.make_instance("franc_bank", "my-account")
+    system.send("env", "new", cls="franc_bank", name="my-account")
     system.send("my-account", "set-dollars", value=100)
     assert system.send("my-account", "get-dollars") == 100
     system.send("my-account", "deposit_by_dollar", value=200)
@@ -402,7 +403,7 @@ def test_multiple_inheritance() -> None:
         methods={},
     )
 
-    system.make_instance("multi_bank", "my-account")
+    system.send("env", "new", cls="multi_bank", name="my-account")
     system.send("my-account", "set-dollars", value=100)
     assert system.send("my-account", "get-dollars") == 100
     system.send("my-account", "deposit_by_dollar", value=200)

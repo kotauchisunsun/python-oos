@@ -16,46 +16,51 @@ class ObjectOrientedSystem:
         self.class_definitions = ClassManagement()
         self.instance_management = InstanceManagement()
 
-    def def_class(
-        self,
-        name: str,
-        bases: list[str],
-        fields: list[AttrType],
-        constructor: ClassConstructor,
-        methods: dict[str, MethodType],
-    ) -> None:
-        base_classes = [self.class_definitions.get_class(base) for base in bases]
-        self.class_definitions.define(name, base_classes, fields, constructor, methods)
+        def define(sys, **argv):
+            base_classes = [
+                self.class_definitions.get_class(base) for base in argv.get("bases", [])
+            ]
+            self.class_definitions.define(
+                argv["name"],
+                base_classes,
+                argv.get("attrs", []),
+                argv.get("constructor", lambda sys, **args: None),
+                argv.get("methods", []),
+            )
 
-    def make_instance(
-        self, class_name: str, instance_name: str, **argv: MessageType
-    ) -> Instance:
-        _class = self.class_definitions.get_class(class_name)
-        instance = self.instance_management.make_instance(_class, instance_name)
-        with self.instance_management:
-            self.instance_management.register_instance("this", instance)
-            _class.constructor(self, **argv)
-        return instance
+        def new(sys, **argv):
+            print("NEW")
+            print(argv)
+            cls = argv["cls"]
+            name = argv["name"]
+            _class = self.class_definitions.get_class(cls)
+            instance = self.instance_management.make_instance(_class, name)
+            with self.instance_management:
+                self.instance_management.register_instance("this", instance)
+                _class.constructor(self, **argv)
+            return instance
+
+        self.class_definitions.define(
+            "environment",
+            [],
+            [],
+            lambda sys, **args: None,
+            {"define": PublicMethod(define), "new": PublicMethod(new)},
+        )
+
+        new(self, cls="environment", name="env")
 
     def send(self, instance_name: str, method: str, **argv: MessageType) -> Any:
-        if instance_name == "env":
-            if method == "define":
-                return self.def_class(
-                    argv["name"],
-                    argv.get("bases", []),
-                    argv.get("attrs", []),
-                    argv.get("constructor", lambda sys, **args: None),
-                    argv.get("methods", {}),
-                )
-            elif method == "new":
-                cls = argv["cls"]
-                name = argv["name"]
-                del argv["cls"]
-                del argv["name"]
-                return self.make_instance(cls, name, **argv)
-        instance = self.instance_management.get_instance(instance_name)
+        print("SEND")
+        print(instance_name, method, argv)
+        print(self.class_definitions.classes)
+        print(self.instance_management.instances)
 
+        instance = self.instance_management.get_instance(instance_name)
         f = instance.get_method(method)
+
+        if instance_name == "env":
+            self.__call(instance, method, **argv)
 
         with self.instance_management:
             self.instance_management.register_instance("this", instance)
