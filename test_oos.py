@@ -16,7 +16,6 @@ def test_attr() -> None:
         constructor=lambda sys, **args: sys.send("this", "set-yen", value=args["yen"]),
     )
     system.send("env", "new", cls="bank", name="my-account", yen=100)
-    print("====" * 10)
     assert system.send("my-account", "get-yen") == 100
 
 
