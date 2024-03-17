@@ -1,44 +1,37 @@
-from method_accessor import PublicMethod, PrivateMethod, MethodType
-from attr_accessor import AttrType
-from class_management import ClassManagement
+from environment import Environment
+from method_accessor import PublicMethod, PrivateMethod
 from instance import Instance
-from instance_management import InstanceManagement
 from exceptions import MethodAccessDenied
 from typing import Any
-from class_definitions import MessageType, ClassConstructor
+from class_definitions import MessageType
 
 
 class ObjectOrientedSystem:
-    class_definitions: ClassManagement
-    instance_management: InstanceManagement
-
     def __init__(self) -> None:
-        self.class_definitions = ClassManagement()
-        self.instance_management = InstanceManagement()
+        self.environment = Environment()
 
-        def define(sys, **argv):
-            base_classes = [
-                self.class_definitions.get_class(base) for base in argv.get("bases", [])
-            ]
-            self.class_definitions.define(
+        def define(sys: ObjectOrientedSystem, **argv: Any):
+            self.environment.define(
                 argv["name"],
-                base_classes,
+                argv.get("bases", []),
                 argv.get("attrs", []),
                 argv.get("constructor", lambda sys, **args: None),
                 argv.get("methods", []),
             )
 
-        def new(sys, **argv):
+        def new(sys: ObjectOrientedSystem, **argv: Any):
             cls = argv["cls"]
             name = argv["name"]
-            _class = self.class_definitions.get_class(cls)
-            instance = self.instance_management.make_instance(_class, name)
-            with self.instance_management:
-                self.instance_management.register_instance("this", instance)
-                _class.constructor(self, **argv)
-            return instance
+            del argv["cls"]
+            del argv["name"]
+            instance = self.environment.new(cls, name, **argv)
 
-        self.class_definitions.define(
+            with self.environment:
+                self.environment.register_instance("this", instance)
+                instance.class_type.constructor(self, **argv)
+                return instance
+
+        self.environment.define(
             "environment",
             [],
             [],
@@ -46,18 +39,17 @@ class ObjectOrientedSystem:
             {"define": PublicMethod(define), "new": PublicMethod(new)},
         )
 
-        self.instance_management.make_instance(
-            self.class_definitions.get_class("environment"), "env"
-        )
+        env = self.environment.new("environment", "env")
+        self.environment.register_instance("env", env)
 
     def send(self, instance_name: str, method: str, **argv: MessageType) -> Any:
-        instance = self.instance_management.get_instance(instance_name)
+        instance = self.environment.get_instance(instance_name)
 
         if instance_name == "env":
             return self.__call(instance, method, **argv)
 
-        with self.instance_management:
-            self.instance_management.register_instance("this", instance)
+        with self.environment:
+            self.environment.register_instance("this", instance)
             if instance_name == "this":
                 return self.__call(instance, method, **argv)
 
