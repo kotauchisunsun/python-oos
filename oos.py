@@ -52,7 +52,6 @@ class ObjectOrientedSystem:
 
     def send(self, instance_name: str, method: str, **argv: MessageType) -> Any:
         instance = self.instance_management.get_instance(instance_name)
-        f = instance.get_method(method)
 
         if instance_name == "env":
             return self.__call(instance, method, **argv)
@@ -62,6 +61,7 @@ class ObjectOrientedSystem:
             if instance_name == "this":
                 return self.__call(instance, method, **argv)
 
+            f = instance.get_method(method)
             if isinstance(f, PrivateMethod):
                 raise MethodAccessDenied(f"{method} is PrivateMethod")
             elif isinstance(f, PublicMethod):
