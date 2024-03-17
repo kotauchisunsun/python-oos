@@ -16,7 +16,7 @@ class ClassManagement:
         bases: Sequence[ClassInterface],
         fields: list[AttrType],
         constructor: ClassConstructor,
-        methods: dict[str, MethodType] = {},
+        methods: dict[str, MethodType],
     ) -> None:
         self.classes[name] = Class(name, bases, fields, constructor, methods)
 

@@ -15,7 +15,7 @@ def test_attr() -> None:
         attrs=[PublicAttr("yen")],
         constructor=lambda sys, **args: sys.send("this", "set-yen", value=args["yen"]),
     )
-    system.make_instance("bank", "my-account", yen=100)
+    system.send("env", "new", cls="bank", name="my-account", yen=100)
     assert system.send("my-account", "get-yen") == 100
 
 
@@ -27,7 +27,7 @@ def test_default_attr_value() -> None:
         name="bank",
         attrs=[PublicAttr("yen", 10)],
     )
-    system.make_instance("bank", "my-account")
+    system.send("env", "new", cls="bank", name="my-account")
     assert system.send("my-account", "get-yen") == 10
 
 
@@ -42,7 +42,7 @@ def test_public_attr() -> None:
             "this", "set-dollars", value=args["dollars"]
         ),
     )
-    system.make_instance("bank", "my-account", dollars=100)
+    system.send("env", "new", cls="bank", name="my-account", dollars=100)
     assert system.send("my-account", "get-dollars") == 100
     system.send("my-account", "set-dollars", value=200)
     assert system.send("my-account", "get-dollars") == 200
@@ -59,7 +59,7 @@ def test_private_attr() -> None:
             "this", "set-dollars", value=args["dollars"]
         ),
     )
-    system.make_instance("bank", "my-account", dollars=100)
+    system.send("env", "new", cls="bank", name="my-account", dollars=100)
     with pytest.raises(MethodAccessDenied):
         system.send("my-account", "get-dollars")
     with pytest.raises(MethodAccessDenied):
@@ -77,7 +77,7 @@ def test_readonly_attr() -> None:
             "this", "set-dollars", value=args["dollars"]
         ),
     )
-    system.make_instance("bank", "my-account", dollars=100)
+    system.send("env", "new", cls="bank", name="my-account", dollars=100)
     assert system.send("my-account", "get-dollars") == 100
     with pytest.raises(MethodAccessDenied):
         system.send("my-account", "set-dollars", value=200)
@@ -110,7 +110,7 @@ def test_bank() -> None:
             ),
         },
     )
-    system.make_instance("bank", "my-account", dollars=100)
+    system.send("env", "new", cls="bank", name="my-account", dollars=100)
     system.send("my-account", "deposit", value=50)
     assert system.send("my-account", "get-dollars") == 150
     system.send("my-account", "withdraw", value=200)
@@ -137,7 +137,7 @@ def test_public_method() -> None:
             ),
         },
     )
-    system.make_instance("bank", "my-account", dollars=100)
+    system.send("env", "new", cls="bank", name="my-account", dollars=100)
     system.send("my-account", "deposit", value=50)
 
 
@@ -161,7 +161,7 @@ def test_private_method() -> None:
             ),
         },
     )
-    system.make_instance("bank", "my-account", dollars=100)
+    system.send("env", "new", cls="bank", name="my-account", dollars=100)
     with pytest.raises(MethodAccessDenied):
         system.send("my-account", "deposit", value=50)
 
@@ -216,9 +216,9 @@ def test_polymorphism() -> None:
             ),
         },
     )
-    system.make_instance("bank", "source_bank", dollars=100)
-    system.make_instance("bank", "target_dollar_bank", dollars=200)
-    system.make_instance("japan_bank", "target_yen_bank", yen=500)
+    system.send("env", "new", cls="bank", name="source_bank", dollars=100)
+    system.send("env", "new", cls="bank", name="target_dollar_bank", dollars=200)
+    system.send("env", "new", cls="japan_bank", name="target_yen_bank", yen=500)
 
     system.send("source_bank", "send", to="target_dollar_bank", amount=50)
 

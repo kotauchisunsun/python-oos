@@ -21,8 +21,8 @@ class ObjectOrientedSystem:
         name: str,
         bases: list[str],
         fields: list[AttrType],
-        constructor: ClassConstructor = lambda sys, **args: None,
-        methods: dict[str, MethodType] = {},
+        constructor: ClassConstructor,
+        methods: dict[str, MethodType],
     ) -> None:
         base_classes = [self.class_definitions.get_class(base) for base in bases]
         self.class_definitions.define(name, base_classes, fields, constructor, methods)
@@ -47,6 +47,12 @@ class ObjectOrientedSystem:
                     argv.get("constructor", lambda sys, **args: None),
                     argv.get("methods", {}),
                 )
+            elif method == "new":
+                cls = argv["cls"]
+                name = argv["name"]
+                del argv["cls"]
+                del argv["name"]
+                return self.make_instance(cls, name, **argv)
         instance = self.instance_management.get_instance(instance_name)
 
         f = instance.get_method(method)
