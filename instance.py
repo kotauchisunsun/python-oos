@@ -48,7 +48,7 @@ def build_getter_setter(
     def setter(sys: System, **args: dict[str, Any]) -> None:
         this.attributes[attr.name] = args["value"]
 
-    table :dict[type[AttrType],tuple[type[MethodType], type[MethodType]]]= {
+    table: dict[type[AttrType], tuple[type[MethodType], type[MethodType]]] = {
         PublicAttr: (PublicMethod, PublicMethod),
         PrivateAttr: (PrivateMethod, PrivateMethod),
         ReadonlyAttr: (PublicMethod, PrivateMethod),

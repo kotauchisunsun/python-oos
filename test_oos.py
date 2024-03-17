@@ -1,18 +1,19 @@
-from oos import ObjectOrientedSystem
+from typing import Any
 import pytest
-from attr_accessor import PublicAttr, PrivateAttr, ReadonlyAttr
-from method_accessor import PublicMethod, PrivateMethod
 from exceptions import MethodAccessDenied
-from typing import Any, Callable
+from method_accessor import PrivateMethod, PublicMethod
+from oos import ObjectOrientedSystem
+from attr_accessor import PublicAttr, PrivateAttr, ReadonlyAttr
 
 
 def test_attr() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("yen")],
-        lambda sys, **args: sys.send("this", "set-yen", value=args["yen"]),
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("yen")],
+        constructor=lambda sys, **args: sys.send("this", "set-yen", value=args["yen"]),
     )
     system.make_instance("bank", "my-account", yen=100)
     assert system.send("my-account", "get-yen") == 100
@@ -20,10 +21,11 @@ def test_attr() -> None:
 
 def test_default_attr_value() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("yen", 10)],
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("yen", 10)],
     )
     system.make_instance("bank", "my-account")
     assert system.send("my-account", "get-yen") == 10
@@ -31,11 +33,14 @@ def test_default_attr_value() -> None:
 
 def test_public_attr() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("dollars")],
-        lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("dollars")],
+        constructor=lambda sys, **args: sys.send(
+            "this", "set-dollars", value=args["dollars"]
+        ),
     )
     system.make_instance("bank", "my-account", dollars=100)
     assert system.send("my-account", "get-dollars") == 100
@@ -45,11 +50,14 @@ def test_public_attr() -> None:
 
 def test_private_attr() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PrivateAttr("dollars")],
-        lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PrivateAttr("dollars")],
+        constructor=lambda sys, **args: sys.send(
+            "this", "set-dollars", value=args["dollars"]
+        ),
     )
     system.make_instance("bank", "my-account", dollars=100)
     with pytest.raises(MethodAccessDenied):
@@ -60,11 +68,14 @@ def test_private_attr() -> None:
 
 def test_readonly_attr() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [ReadonlyAttr("dollars")],
-        lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[ReadonlyAttr("dollars")],
+        constructor=lambda sys, **args: sys.send(
+            "this", "set-dollars", value=args["dollars"]
+        ),
     )
     system.make_instance("bank", "my-account", dollars=100)
     assert system.send("my-account", "get-dollars") == 100
@@ -74,11 +85,14 @@ def test_readonly_attr() -> None:
 
 def test_bank() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("dollars")],
-        lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("dollars")],
+        constructor=lambda sys, **args: sys.send(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={
             "deposit": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -105,11 +119,14 @@ def test_bank() -> None:
 
 def test_public_method() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("dollars")],
-        lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("dollars")],
+        constructor=lambda sys, **args: sys.send(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={
             "deposit": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -126,11 +143,14 @@ def test_public_method() -> None:
 
 def test_private_method() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("dollars")],
-        lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("dollars")],
+        constructor=lambda sys, **args: sys.send(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={
             "deposit": PrivateMethod(
                 lambda sys, **args: sys.send(
@@ -149,11 +169,14 @@ def test_private_method() -> None:
 # ポリモーフィズムのテスト
 def test_polymorphism() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("dollars")],
-        lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("dollars")],
+        constructor=lambda sys, **args: sys.send(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={
             "deposit_by_dollar": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -177,11 +200,12 @@ def test_polymorphism() -> None:
             ),
         },
     )
-    system.def_class(
-        "japan_bank",
-        [],
-        [PublicAttr("yen")],
-        lambda sys, **args: sys.send("this", "set-yen", value=args["yen"]),
+    system.send(
+        "env",
+        "define",
+        name="japan_bank",
+        attrs=[PublicAttr("yen")],
+        constructor=lambda sys, **args: sys.send("this", "set-yen", value=args["yen"]),
         methods={
             "deposit_by_dollar": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -211,17 +235,22 @@ def test_polymorphism() -> None:
 
 def test_inheritance_getter_setter() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("dollars")],
-        lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("dollars")],
+        constructor=lambda sys, **args: sys.send(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={},
     )
-    system.def_class(
-        "japan_bank",
-        ["bank"],
-        [PublicAttr("yen")],
+    system.send(
+        "env",
+        "define",
+        name="japan_bank",
+        bases=["bank"],
+        attrs=[PublicAttr("yen")],
         methods={},
     )
     system.make_instance("japan_bank", "my-account")
@@ -233,11 +262,14 @@ def test_inheritance_getter_setter() -> None:
 
 def test_inheritance_method() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("dollars")],
-        lambda sys, **args: sys.send("this", "set-dollars", value=args["dollars"]),
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("dollars")],
+        constructor=lambda sys, **args: sys.send(
+            "this", "set-dollars", value=args["dollars"]
+        ),
         methods={
             "deposit_by_dollar": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -248,10 +280,12 @@ def test_inheritance_method() -> None:
             ),
         },
     )
-    system.def_class(
-        "japan_bank",
-        ["bank"],
-        [PublicAttr("yen")],
+    system.send(
+        "env",
+        "define",
+        name="japan_bank",
+        bases=["bank"],
+        attrs=[PublicAttr("yen")],
         methods={
             "deposit_by_yen": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -273,10 +307,11 @@ def test_inheritance_method() -> None:
 
 def test_inheritance_chain_method() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("dollars")],
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("dollars")],
         methods={
             "deposit_by_dollar": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -287,10 +322,12 @@ def test_inheritance_chain_method() -> None:
             ),
         },
     )
-    system.def_class(
-        "japan_bank",
-        ["bank"],
-        [PublicAttr("yen")],
+    system.send(
+        "env",
+        "define",
+        name="japan_bank",
+        bases=["bank"],
+        attrs=[PublicAttr("yen")],
         methods={
             "deposit_by_yen": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -301,10 +338,12 @@ def test_inheritance_chain_method() -> None:
             ),
         },
     )
-    system.def_class(
-        "franc_bank",
-        ["japan_bank"],
-        [PublicAttr("franc")],
+    system.send(
+        "env",
+        "define",
+        name="franc_bank",
+        bases=["japan_bank"],
+        attrs=[PublicAttr("franc")],
         methods={
             "deposit_by_franc": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -325,10 +364,11 @@ def test_inheritance_chain_method() -> None:
 
 def test_multiple_inheritance() -> None:
     system = ObjectOrientedSystem()
-    system.def_class(
-        "bank",
-        [],
-        [PublicAttr("dollars")],
+    system.send(
+        "env",
+        "define",
+        name="bank",
+        attrs=[PublicAttr("dollars")],
         methods={
             "deposit_by_dollar": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -339,10 +379,11 @@ def test_multiple_inheritance() -> None:
             ),
         },
     )
-    system.def_class(
-        "japan_bank",
-        [],
-        [PublicAttr("yen")],
+    system.send(
+        "env",
+        "define",
+        name="japan_bank",
+        attrs=[PublicAttr("yen")],
         methods={
             "deposit_by_yen": PublicMethod(
                 lambda sys, **args: sys.send(
@@ -353,10 +394,11 @@ def test_multiple_inheritance() -> None:
             ),
         },
     )
-    system.def_class(
-        "multi_bank",
-        ["bank", "japan_bank"],
-        [],
+    system.send(
+        "env",
+        "define",
+        name="multi_bank",
+        bases=["bank", "japan_bank"],
         methods={},
     )
 
@@ -371,17 +413,21 @@ def test_multiple_inheritance() -> None:
     system.send("my-account", "deposit_by_yen", value=20)
     assert system.send("my-account", "get-yen") == 30
 
+
 def test_virtual_bank() -> None:
     def new_bank(dollars: int) -> dict[str, Any]:
-        fields: dict[str,Any] = {"dollars": dollars}
+        fields: dict[str, Any] = {"dollars": dollars}
+
         def deposit(value: int) -> None:
             fields["dollars"] += value
+
         def withdraw(value: int) -> None:
             fields["dollars"] = max(0, fields["dollars"] - value)
+
         fields["deposit"] = deposit
         fields["withdraw"] = withdraw
         return fields
-    
+
     my_account = new_bank(200)
     assert my_account["dollars"] == 200
     my_account["deposit"](50)

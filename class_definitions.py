@@ -6,6 +6,7 @@ from typing import Iterable, Any, Callable, Protocol, Sequence
 MessageType = Any
 ClassConstructor = Callable[..., None]
 
+
 class ClassInterface(Protocol):
     @property
     def attrs(self) -> list[AttrType]: ...
@@ -14,14 +15,15 @@ class ClassInterface(Protocol):
     def attrs(self, attrs: list[AttrType]) -> None: ...
 
     @property
-    def bases(self) -> Sequence['ClassInterface']: ...
-    
-    @bases.setter
-    def bases(self, bases: Sequence['ClassInterface']) -> None: ...
+    def bases(self) -> Sequence["ClassInterface"]: ...
 
-    def get_default_attr(self) -> dict[str, AttrType]:...
+    @bases.setter
+    def bases(self, bases: Sequence["ClassInterface"]) -> None: ...
+
+    def get_default_attr(self) -> dict[str, AttrType]: ...
     def find_method(self, name: str) -> Iterable[MethodType]: ...
     def get_method(self, name: str) -> MethodType: ...
+
 
 class Class(ClassInterface):
     def __init__(
@@ -41,6 +43,7 @@ class Class(ClassInterface):
     @property
     def bases(self) -> Sequence[ClassInterface]:
         return self._bases
+
     @bases.setter
     def bases(self, bases: Sequence[ClassInterface]) -> None:
         self._bases = bases
@@ -48,7 +51,7 @@ class Class(ClassInterface):
     @property
     def attrs(self) -> list[AttrType]:
         return self._attrs
-    
+
     @attrs.setter
     def attrs(self, attrs: list[AttrType]) -> None:
         self._attrs = attrs

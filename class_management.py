@@ -1,5 +1,5 @@
 from typing import Sequence
-from class_definitions import Class,ClassInterface, ClassConstructor
+from class_definitions import Class, ClassInterface, ClassConstructor
 from attr_accessor import AttrType
 from method_accessor import MethodType
 

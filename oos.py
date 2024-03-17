@@ -38,6 +38,15 @@ class ObjectOrientedSystem:
         return instance
 
     def send(self, instance_name: str, method: str, **argv: MessageType) -> Any:
+        if instance_name == "env":
+            if method == "define":
+                return self.def_class(
+                    argv["name"],
+                    argv.get("bases", []),
+                    argv.get("attrs", []),
+                    argv.get("constructor", lambda sys, **args: None),
+                    argv.get("methods", {}),
+                )
         instance = self.instance_management.get_instance(instance_name)
 
         f = instance.get_method(method)
