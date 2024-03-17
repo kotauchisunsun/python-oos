@@ -29,8 +29,6 @@ class ObjectOrientedSystem:
             )
 
         def new(sys, **argv):
-            print("NEW")
-            print(argv)
             cls = argv["cls"]
             name = argv["name"]
             _class = self.class_definitions.get_class(cls)
@@ -51,16 +49,11 @@ class ObjectOrientedSystem:
         new(self, cls="environment", name="env")
 
     def send(self, instance_name: str, method: str, **argv: MessageType) -> Any:
-        print("SEND")
-        print(instance_name, method, argv)
-        print(self.class_definitions.classes)
-        print(self.instance_management.instances)
-
         instance = self.instance_management.get_instance(instance_name)
         f = instance.get_method(method)
 
         if instance_name == "env":
-            self.__call(instance, method, **argv)
+            return self.__call(instance, method, **argv)
 
         with self.instance_management:
             self.instance_management.register_instance("this", instance)
