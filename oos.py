@@ -46,7 +46,9 @@ class ObjectOrientedSystem:
             {"define": PublicMethod(define), "new": PublicMethod(new)},
         )
 
-        new(self, cls="environment", name="env")
+        self.instance_management.make_instance(
+            self.class_definitions.get_class("environment"), "env"
+        )
 
     def send(self, instance_name: str, method: str, **argv: MessageType) -> Any:
         instance = self.instance_management.get_instance(instance_name)
