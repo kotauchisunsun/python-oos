@@ -1,3 +1,5 @@
+import random
+from attr_accessor import PublicAttr
 from environment import Environment
 from method_accessor import PublicMethod, PrivateMethod
 from instance import Instance
@@ -46,9 +48,31 @@ class ObjectOrientedSystem:
         instance = self.environment.get_instance(instance_name)
 
         if instance_name == "env":
+            name = "args%f" % random.random()
+            self.environment.define(
+                name,
+                [],
+                [PublicAttr(k, v) for k, v in argv.items()],
+                lambda sys, **args: None,
+                {},
+            )
+            _argv = self.environment.new(name, "args")
+            self.environment.register_instance("args", _argv)
+
             return self.__call(instance, method, **argv)
 
         with self.environment:
+            name = "args%f" % random.random()
+            self.environment.define(
+                name,
+                [],
+                [PublicAttr(k, v) for k, v in argv.items()],
+                lambda sys, **args: None,
+                {},
+            )
+            _argv = self.environment.new(name, "args")
+            self.environment.register_instance("args", _argv)
+
             self.environment.register_instance("this", instance)
             if instance_name == "this":
                 return self.__call(instance, method, **argv)
