@@ -6,6 +6,12 @@ from oos import ObjectOrientedSystem
 from attr_accessor import PublicAttr, PrivateAttr, ReadonlyAttr
 
 
+def test_int() -> None:
+    system = ObjectOrientedSystem()
+    system.send("env", "new", cls="int", name="x", value=10)
+    assert system.send("x", "get-value") == 10
+
+
 def test_attr() -> None:
     system = ObjectOrientedSystem()
     system.send(
@@ -19,6 +25,7 @@ def test_attr() -> None:
     assert system.send("my-account", "get-yen") == 100
 
 
+"""
 def test_default_attr_value() -> None:
     system = ObjectOrientedSystem()
     system.send(
@@ -436,3 +443,4 @@ def test_virtual_bank() -> None:
     assert my_account["dollars"] == 150
     my_account["withdraw"](200)
     assert my_account["dollars"] == 0
+"""

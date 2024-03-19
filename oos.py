@@ -1,3 +1,4 @@
+from attr_accessor import PublicAttr
 from environment import Environment
 from method_accessor import PublicMethod, PrivateMethod
 from instance import Instance
@@ -41,6 +42,14 @@ class ObjectOrientedSystem:
 
         env = self.environment.new("environment", "env")
         self.environment.register_instance("env", env)
+
+        self.environment.define(
+            "int",
+            [],
+            [PublicAttr("value")],
+            lambda sys, **args: sys.send("this", "set-value", value=args["value"]),
+            {},
+        )
 
     def send(self, instance_name: str, method: str, **argv: MessageType) -> Any:
         instance = self.environment.get_instance(instance_name)
