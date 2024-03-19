@@ -13,7 +13,7 @@ class ObjectOrientedSystem:
         self.environment = Environment()
 
         def define(sys: ObjectOrientedSystem, **argv: Any):
-            attr_fallback = (
+            attr_or_fallback = (
                 lambda name, default: sys.send("args", "get-%s" % name)
                 if sys.send("args", "has", attr=name)
                 else default
@@ -21,10 +21,10 @@ class ObjectOrientedSystem:
 
             self.environment.define(
                 sys.send("args", "get-name"),
-                attr_fallback("bases", []),
-                attr_fallback("attrs", []),
-                attr_fallback("constructor", lambda sys: None),
-                attr_fallback("methods", {}),
+                attr_or_fallback("bases", []),
+                attr_or_fallback("attrs", []),
+                attr_or_fallback("constructor", lambda sys: None),
+                attr_or_fallback("methods", {}),
             )
 
         def new(sys: ObjectOrientedSystem, **argv: Any):
@@ -52,29 +52,13 @@ class ObjectOrientedSystem:
         instance = self.environment.get_instance(instance_name)
 
         if instance_name == "env":
-            name = "args%f" % random.random()
-            self.environment.define(
-                name,
-                [],
-                [PublicAttr(k, v) for k, v in argv.items()],
-                lambda sys, **args: None,
-                {"has": PublicMethod(lambda sys: sys.send("args", "get-attr") in argv)},
-            )
-            _argv = self.environment.new(name, "args")
+            _argv = self.instantiate(argv)
             self.environment.register_instance("args", _argv)
 
             return self.__call(instance, method, **argv)
 
         with self.environment:
-            name = "args%f" % random.random()
-            self.environment.define(
-                name,
-                [],
-                [PublicAttr(k, v) for k, v in argv.items()],
-                lambda sys, **args: None,
-                {},
-            )
-            _argv = self.environment.new(name, "args")
+            _argv = self.instantiate(argv)
             self.environment.register_instance("args", _argv)
 
             self.environment.register_instance("this", instance)
@@ -86,6 +70,17 @@ class ObjectOrientedSystem:
                 raise MethodAccessDenied(f"{method} is PrivateMethod")
             elif isinstance(f, PublicMethod):
                 return self.__call(instance, method, **argv)
+
+    def instantiate(self, argv):
+        name = "args%f" % random.random()
+        self.environment.define(
+            name,
+            [],
+            [PublicAttr(k, v) for k, v in argv.items()],
+            lambda sys, **args: None,
+            {"has": PublicMethod(lambda sys: sys.send("args", "get-attr") in argv)},
+        )
+        return self.environment.new(name, "args")
 
     def __call(self, instance: Instance, method: str, **argv: MessageType) -> Any:
         f = instance.get_method(method)
