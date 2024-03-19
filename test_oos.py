@@ -416,17 +416,17 @@ def test_multiple_inheritance() -> None:
 
 def test_virtual_bank() -> None:
     def new_bank(dollars: int) -> dict[str, Any]:
-        fields: dict[str, Any] = {"dollars": dollars}
+        attrs: dict[str, Any] = {"dollars": dollars}
 
         def deposit(value: int) -> None:
-            fields["dollars"] += value
+            attrs["dollars"] += value
 
         def withdraw(value: int) -> None:
-            fields["dollars"] = max(0, fields["dollars"] - value)
+            attrs["dollars"] = max(0, attrs["dollars"] - value)
 
-        fields["deposit"] = deposit
-        fields["withdraw"] = withdraw
-        return fields
+        attrs["deposit"] = deposit
+        attrs["withdraw"] = withdraw
+        return attrs
 
     my_account = new_bank(200)
     assert my_account["dollars"] == 200

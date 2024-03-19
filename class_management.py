@@ -14,11 +14,11 @@ class ClassManagement:
         self,
         name: str,
         bases: Sequence[ClassInterface],
-        fields: list[AttrType],
+        attrs: list[AttrType],
         constructor: ClassConstructor,
         methods: dict[str, MethodType],
     ) -> None:
-        self.classes[name] = Class(name, bases, fields, constructor, methods)
+        self.classes[name] = Class(name, bases, attrs, constructor, methods)
 
     def get_class(self, name: str) -> Class:
         return self.classes[name]
