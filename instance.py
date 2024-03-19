@@ -46,7 +46,7 @@ def build_getter_setter(
         return this.attributes[attr.name]
 
     def setter(sys: System, **args: dict[str, Any]) -> None:
-        this.attributes[attr.name] = args["value"]
+        this.attributes[attr.name] = sys.send("args", "get-value")
 
     table: dict[type[AttrType], tuple[type[MethodType], type[MethodType]]] = {
         PublicAttr: (PublicMethod, PublicMethod),

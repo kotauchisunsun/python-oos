@@ -13,31 +13,35 @@ class ObjectOrientedSystem:
         self.environment = Environment()
 
         def define(sys: ObjectOrientedSystem, **argv: Any):
+            attr_fallback = (
+                lambda name, default: sys.send("args", "get-%s" % name)
+                if sys.send("args", "has", attr=name)
+                else default
+            )
+
             self.environment.define(
-                argv["name"],
-                argv.get("bases", []),
-                argv.get("attrs", []),
-                argv.get("constructor", lambda sys, **args: None),
-                argv.get("methods", []),
+                sys.send("args", "get-name"),
+                attr_fallback("bases", []),
+                attr_fallback("attrs", []),
+                attr_fallback("constructor", lambda sys: None),
+                attr_fallback("methods", {}),
             )
 
         def new(sys: ObjectOrientedSystem, **argv: Any):
-            cls = argv["cls"]
-            name = argv["name"]
-            del argv["cls"]
-            del argv["name"]
+            cls = sys.send("args", "get-cls")
+            name = sys.send("args", "get-name")
             instance = self.environment.new(cls, name, **argv)
 
             with self.environment:
                 self.environment.register_instance("this", instance)
-                instance.class_type.constructor(self, **argv)
+                instance.class_type.constructor(self)
                 return instance
 
         self.environment.define(
             "environment",
             [],
             [],
-            lambda sys, **args: None,
+            lambda sys: None,
             {"define": PublicMethod(define), "new": PublicMethod(new)},
         )
 
@@ -54,7 +58,7 @@ class ObjectOrientedSystem:
                 [],
                 [PublicAttr(k, v) for k, v in argv.items()],
                 lambda sys, **args: None,
-                {},
+                {"has": PublicMethod(lambda sys: sys.send("args", "get-attr") in argv)},
             )
             _argv = self.environment.new(name, "args")
             self.environment.register_instance("args", _argv)
@@ -85,4 +89,4 @@ class ObjectOrientedSystem:
 
     def __call(self, instance: Instance, method: str, **argv: MessageType) -> Any:
         f = instance.get_method(method)
-        return f.method(self, **argv)
+        return f.method(self)

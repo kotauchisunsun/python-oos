@@ -13,7 +13,7 @@ def test_attr() -> None:
         "define",
         name="bank",
         attrs=[PublicAttr("yen")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-yen", value=sys.send("args", "get-yen")
         ),
     )
@@ -40,7 +40,7 @@ def test_public_attr() -> None:
         "define",
         name="bank",
         attrs=[PublicAttr("dollars")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-dollars", value=sys.send("args", "get-dollars")
         ),
     )
@@ -57,7 +57,7 @@ def test_private_attr() -> None:
         "define",
         name="bank",
         attrs=[PrivateAttr("dollars")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-dollars", value=sys.send("args", "get-dollars")
         ),
     )
@@ -75,7 +75,7 @@ def test_readonly_attr() -> None:
         "define",
         name="bank",
         attrs=[ReadonlyAttr("dollars")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-dollars", value=sys.send("args", "get-dollars")
         ),
     )
@@ -92,12 +92,12 @@ def test_bank() -> None:
         "define",
         name="bank",
         attrs=[PublicAttr("dollars")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-dollars", value=sys.send("args", "get-dollars")
         ),
         methods={
             "deposit": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-dollars",
                     value=sys.send("this", "get-dollars")
@@ -105,7 +105,7 @@ def test_bank() -> None:
                 )
             ),
             "withdraw": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-dollars",
                     value=max(
@@ -130,12 +130,12 @@ def test_public_method() -> None:
         "define",
         name="bank",
         attrs=[PublicAttr("dollars")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-dollars", value=sys.send("args", "get-dollars")
         ),
         methods={
             "deposit": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-dollars",
                     value=sys.send("this", "get-dollars")
@@ -155,12 +155,12 @@ def test_private_method() -> None:
         "define",
         name="bank",
         attrs=[PublicAttr("dollars")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-dollars", value=sys.send("args", "get-dollars")
         ),
         methods={
             "deposit": PrivateMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-dollars",
                     value=sys.send("this", "get-dollars")
@@ -182,12 +182,12 @@ def test_polymorphism() -> None:
         "define",
         name="bank",
         attrs=[PublicAttr("dollars")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-dollars", value=sys.send("args", "get-dollars")
         ),
         methods={
             "deposit_by_dollar": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-dollars",
                     value=sys.send("this", "get-dollars")
@@ -195,7 +195,7 @@ def test_polymorphism() -> None:
                 )
             ),
             "withdraw": PrivateMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-dollars",
                     value=sys.send("this", "get-dollars")
@@ -203,7 +203,7 @@ def test_polymorphism() -> None:
                 )
             ),
             "send": PublicMethod(
-                lambda sys, **args: (
+                lambda sys: (
                     sys.send(
                         sys.send("args", "get-to"),
                         "deposit_by_dollar",
@@ -219,12 +219,12 @@ def test_polymorphism() -> None:
         "define",
         name="japan_bank",
         attrs=[PublicAttr("yen")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-yen", value=sys.send("args", "get-yen")
         ),
         methods={
             "deposit_by_dollar": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-yen",
                     value=sys.send("this", "get-yen")
@@ -257,7 +257,7 @@ def test_inheritance_getter_setter() -> None:
         "define",
         name="bank",
         attrs=[PublicAttr("dollars")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-dollars", value=sys.send("args", "get-dollars")
         ),
         methods={},
@@ -284,12 +284,12 @@ def test_inheritance_method() -> None:
         "define",
         name="bank",
         attrs=[PublicAttr("dollars")],
-        constructor=lambda sys, **args: sys.send(
+        constructor=lambda sys: sys.send(
             "this", "set-dollars", value=sys.send("args", "get-dollars")
         ),
         methods={
             "deposit_by_dollar": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-dollars",
                     value=sys.send("this", "get-dollars")
@@ -306,7 +306,7 @@ def test_inheritance_method() -> None:
         attrs=[PublicAttr("yen")],
         methods={
             "deposit_by_yen": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-yen",
                     value=sys.send("this", "get-yen") + sys.send("args", "get-value"),
@@ -332,7 +332,7 @@ def test_inheritance_chain_method() -> None:
         attrs=[PublicAttr("dollars")],
         methods={
             "deposit_by_dollar": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-dollars",
                     value=sys.send("this", "get-dollars")
@@ -349,7 +349,7 @@ def test_inheritance_chain_method() -> None:
         attrs=[PublicAttr("yen")],
         methods={
             "deposit_by_yen": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-yen",
                     value=sys.send("this", "get-yen") + sys.send("args", "get-value"),
@@ -365,7 +365,7 @@ def test_inheritance_chain_method() -> None:
         attrs=[PublicAttr("franc")],
         methods={
             "deposit_by_franc": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-franc",
                     value=sys.send("this", "get-franc") + sys.send("args", "get-value"),
@@ -390,7 +390,7 @@ def test_multiple_inheritance() -> None:
         attrs=[PublicAttr("dollars")],
         methods={
             "deposit_by_dollar": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-dollars",
                     value=sys.send("this", "get-dollars")
@@ -406,7 +406,7 @@ def test_multiple_inheritance() -> None:
         attrs=[PublicAttr("yen")],
         methods={
             "deposit_by_yen": PublicMethod(
-                lambda sys, **args: sys.send(
+                lambda sys: sys.send(
                     "this",
                     "set-yen",
                     value=sys.send("this", "get-yen") + sys.send("args", "get-value"),
