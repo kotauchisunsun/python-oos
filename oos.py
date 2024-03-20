@@ -24,6 +24,12 @@ class ObjectOrientedSystem:
         def new(sys: ObjectOrientedSystem):
             cls = sys.send("args", "get-cls")
             name = sys.send("args", "get-name")
+
+            if cls == "int":
+                return self.environment.new_int(
+                    name, sys.send(sys.send("args", "get-value"), "get-value")
+                )
+
             instance = self.environment.new(cls, name)
 
             with self.environment:
@@ -42,16 +48,13 @@ class ObjectOrientedSystem:
         env = self.environment.new("environment", "env")
         self.environment.register_instance("env", env)
 
-        self.environment.define(
-            "int",
-            [],
-            [PublicAttr("value")],
-            lambda sys, **args: sys.send("this", "set-value", value=args["value"]),
-            {},
-        )
-
-    def send(self, instance_name: str, method: str, **argv: MessageType) -> Any:
-        instance = self.environment.get_instance(instance_name)
+    def send(
+        self, instance_name: str | Instance, method: str, **argv: MessageType
+    ) -> Any:
+        if isinstance(instance_name, str):
+            instance = self.environment.get_instance(instance_name)
+        else:
+            instance = instance_name
 
         if instance_name == "env":
             _argv = self.instantiate_argv(argv)
@@ -72,11 +75,20 @@ class ObjectOrientedSystem:
                 return self.__call(instance, method)
 
     def instantiate_argv(self, argv):
+        _argv = {}
+
+        for k, v in argv.items():
+            if isinstance(v, int):
+                name = "args_int_%f" % random.random()
+                _argv[k] = self.environment.new_int(name, v)
+            else:
+                _argv[k] = v
+
         name = "args%f" % random.random()
         self.environment.define(
             name,
             [],
-            [PublicAttr(k, v) for k, v in argv.items()],
+            [PublicAttr(k, v) for k, v in _argv.items()],
             lambda sys: None,
             {
                 "get": PublicMethod(

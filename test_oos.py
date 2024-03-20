@@ -6,12 +6,6 @@ from oos import ObjectOrientedSystem
 from attr_accessor import PublicAttr, PrivateAttr, ReadonlyAttr
 
 
-def test_int() -> None:
-    system = ObjectOrientedSystem()
-    system.send("env", "new", cls="int", name="x", value=10)
-    assert system.send("x", "get-value") == 10
-
-
 def test_attr() -> None:
     system = ObjectOrientedSystem()
     system.send(
@@ -23,11 +17,33 @@ def test_attr() -> None:
             "this", "set-yen", value=sys.send("args", "get-yen")
         ),
     )
+
     system.send("env", "new", cls="bank", name="my-account", yen=100)
-    assert system.send("my-account", "get-yen") == 100
+    a = system.send("my-account", "get-yen")
+    assert system.send(system.send("my-account", "get-yen"), "get-value") == 100
+    b = system.send(system.send("my-account", "get-yen"), "add", value=100)
+    assert system.send(b, "get-value") == 200
 
 
-"""
+def test_int() -> None:
+    system = ObjectOrientedSystem()
+    system.send("env", "new", cls="int", name="x", value=10)
+    assert system.send("x", "get-value") == 10
+
+
+def test_int_add() -> None:
+    system = ObjectOrientedSystem()
+    system.send("env", "new", cls="int", name="x", value=10)
+    assert system.send(system.send("x", "add", value=5), "get-value") == 15
+
+
+def test_int_add_vars() -> None:
+    system = ObjectOrientedSystem()
+    system.send("env", "new", cls="int", name="x", value=10)
+    system.send("env", "new", cls="int", name="y", value=5)
+    assert system.send(system.send("x", "add", value="y"), "get-value") == 15
+
+
 def test_default_attr_value() -> None:
     system = ObjectOrientedSystem()
     system.send(
@@ -52,9 +68,9 @@ def test_public_attr() -> None:
         ),
     )
     system.send("env", "new", cls="bank", name="my-account", dollars=100)
-    assert system.send("my-account", "get-dollars") == 100
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 100
     system.send("my-account", "set-dollars", value=200)
-    assert system.send("my-account", "get-dollars") == 200
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 200
 
 
 def test_private_attr() -> None:
@@ -87,7 +103,7 @@ def test_readonly_attr() -> None:
         ),
     )
     system.send("env", "new", cls="bank", name="my-account", dollars=100)
-    assert system.send("my-account", "get-dollars") == 100
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 100
     with pytest.raises(MethodAccessDenied):
         system.send("my-account", "set-dollars", value=200)
 
@@ -107,17 +123,25 @@ def test_bank() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-dollars",
-                    value=sys.send("this", "get-dollars")
-                    + sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-dollars"),
+                        "add",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
             "withdraw": PublicMethod(
                 lambda sys: sys.send(
                     "this",
                     "set-dollars",
-                    value=max(
-                        0,
-                        sys.send("this", "get-dollars") - sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send(
+                            sys.send("this", "get-dollars"),
+                            "sub",
+                            value=sys.send("args", "get-value"),
+                        ),
+                        "max",
+                        value=0,
                     ),
                 )
             ),
@@ -125,9 +149,9 @@ def test_bank() -> None:
     )
     system.send("env", "new", cls="bank", name="my-account", dollars=100)
     system.send("my-account", "deposit", value=50)
-    assert system.send("my-account", "get-dollars") == 150
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 150
     system.send("my-account", "withdraw", value=200)
-    assert system.send("my-account", "get-dollars") == 0
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 0
 
 
 def test_public_method() -> None:
@@ -145,8 +169,11 @@ def test_public_method() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-dollars",
-                    value=sys.send("this", "get-dollars")
-                    + sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-dollars"),
+                        "add",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
         },
@@ -197,16 +224,22 @@ def test_polymorphism() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-dollars",
-                    value=sys.send("this", "get-dollars")
-                    + sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-dollars"),
+                        "add",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
             "withdraw": PrivateMethod(
                 lambda sys: sys.send(
                     "this",
                     "set-dollars",
-                    value=sys.send("this", "get-dollars")
-                    - sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-dollars"),
+                        "sub",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
             "send": PublicMethod(
@@ -234,8 +267,13 @@ def test_polymorphism() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-yen",
-                    value=sys.send("this", "get-yen")
-                    + sys.send("args", "get-value") * 150,
+                    value=sys.send(
+                        sys.send("this", "get-yen"),
+                        "add",
+                        value=sys.send(
+                            sys.send("args", "get-value"), "multiply", value=150
+                        ),
+                    ),
                 )
             ),
         },
@@ -246,15 +284,17 @@ def test_polymorphism() -> None:
 
     system.send("source_bank", "send", to="target_dollar_bank", amount=50)
 
-    print(system.send("source_bank", "get-dollars"))
-    print(system.send("target_dollar_bank", "get-dollars"))
-    print(system.send("target_yen_bank", "get-yen"))
-
-    assert system.send("source_bank", "get-dollars") == 50
-    assert system.send("target_dollar_bank", "get-dollars") == 250
+    assert system.send(system.send("source_bank", "get-dollars"), "get-value") == 50
+    assert (
+        system.send(system.send("target_dollar_bank", "get-dollars"), "get-value")
+        == 250
+    )
     system.send("source_bank", "send", to="target_yen_bank", amount=50)
-    assert system.send("source_bank", "get-dollars") == 0
-    assert system.send("target_yen_bank", "get-yen") == 500 + 50 * 150
+    assert system.send(system.send("source_bank", "get-dollars"), "get-value") == 0
+    assert (
+        system.send(system.send("target_yen_bank", "get-yen"), "get-value")
+        == 500 + 50 * 150
+    )
 
 
 def test_inheritance_getter_setter() -> None:
@@ -279,9 +319,9 @@ def test_inheritance_getter_setter() -> None:
     )
     system.send("env", "new", cls="japan_bank", name="my-account")
     system.send("my-account", "set-dollars", value=100)
-    assert system.send("my-account", "get-dollars") == 100
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 100
     system.send("my-account", "set-yen", value=10)
-    assert system.send("my-account", "get-yen") == 10
+    assert system.send(system.send("my-account", "get-yen"), "get-value") == 10
 
 
 def test_inheritance_method() -> None:
@@ -299,8 +339,11 @@ def test_inheritance_method() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-dollars",
-                    value=sys.send("this", "get-dollars")
-                    + sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-dollars"),
+                        "add",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
         },
@@ -316,7 +359,11 @@ def test_inheritance_method() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-yen",
-                    value=sys.send("this", "get-yen") + sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-yen"),
+                        "add",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
         },
@@ -325,9 +372,9 @@ def test_inheritance_method() -> None:
     system.send("my-account", "set-dollars", value=100)
     system.send("my-account", "set-yen", value=10)
     system.send("my-account", "deposit_by_dollar", value=200)
-    assert system.send("my-account", "get-dollars") == 300
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 300
     system.send("my-account", "deposit_by_yen", value=20)
-    assert system.send("my-account", "get-yen") == 30
+    assert system.send(system.send("my-account", "get-yen"), "get-value") == 30
 
 
 def test_inheritance_chain_method() -> None:
@@ -342,8 +389,11 @@ def test_inheritance_chain_method() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-dollars",
-                    value=sys.send("this", "get-dollars")
-                    + sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-dollars"),
+                        "add",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
         },
@@ -359,7 +409,11 @@ def test_inheritance_chain_method() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-yen",
-                    value=sys.send("this", "get-yen") + sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-yen"),
+                        "add",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
         },
@@ -375,7 +429,11 @@ def test_inheritance_chain_method() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-franc",
-                    value=sys.send("this", "get-franc") + sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-franc"),
+                        "add",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
         },
@@ -383,9 +441,9 @@ def test_inheritance_chain_method() -> None:
 
     system.send("env", "new", cls="franc_bank", name="my-account")
     system.send("my-account", "set-dollars", value=100)
-    assert system.send("my-account", "get-dollars") == 100
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 100
     system.send("my-account", "deposit_by_dollar", value=200)
-    assert system.send("my-account", "get-dollars") == 300
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 300
 
 
 def test_multiple_inheritance() -> None:
@@ -400,8 +458,11 @@ def test_multiple_inheritance() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-dollars",
-                    value=sys.send("this", "get-dollars")
-                    + sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-dollars"),
+                        "add",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
         },
@@ -416,7 +477,11 @@ def test_multiple_inheritance() -> None:
                 lambda sys: sys.send(
                     "this",
                     "set-yen",
-                    value=sys.send("this", "get-yen") + sys.send("args", "get-value"),
+                    value=sys.send(
+                        sys.send("this", "get-yen"),
+                        "add",
+                        value=sys.send("args", "get-value"),
+                    ),
                 )
             ),
         },
@@ -431,14 +496,14 @@ def test_multiple_inheritance() -> None:
 
     system.send("env", "new", cls="multi_bank", name="my-account")
     system.send("my-account", "set-dollars", value=100)
-    assert system.send("my-account", "get-dollars") == 100
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 100
     system.send("my-account", "deposit_by_dollar", value=200)
-    assert system.send("my-account", "get-dollars") == 300
+    assert system.send(system.send("my-account", "get-dollars"), "get-value") == 300
 
     system.send("my-account", "set-yen", value=10)
-    assert system.send("my-account", "get-yen") == 10
+    assert system.send(system.send("my-account", "get-yen"), "get-value") == 10
     system.send("my-account", "deposit_by_yen", value=20)
-    assert system.send("my-account", "get-yen") == 30
+    assert system.send(system.send("my-account", "get-yen"), "get-value") == 30
 
 
 def test_virtual_bank() -> None:
@@ -463,4 +528,3 @@ def test_virtual_bank() -> None:
     assert my_account["dollars"] == 150
     my_account["withdraw"](200)
     assert my_account["dollars"] == 0
-"""
