@@ -261,16 +261,11 @@ def test_polymorphism() -> None:
     system.send("source_bank", "send", to="target_dollar_bank", amount=50)
 
     assert system.send("source_bank", "get-dollars").value() == 50
-    assert (
-        system.send(system.send("target_dollar_bank", "get-dollars"), "get-value")
-        == 250
-    )
+    assert system.send("target_dollar_bank", "get-dollars").value() == 250
+
     system.send("source_bank", "send", to="target_yen_bank", amount=50)
     assert system.send("source_bank", "get-dollars").value() == 0
-    assert (
-        system.send(system.send("target_yen_bank", "get-yen"), "get-value")
-        == 500 + 50 * 150
-    )
+    assert system.send("target_yen_bank", "get-yen").value() == 500 + 50 * 150
 
 
 def test_inheritance_getter_setter() -> None:
