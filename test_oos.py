@@ -17,18 +17,15 @@ dollar_constructor = lambda sys: sys.send(
 def generate_deposit_by_currency(
     currency: str,
 ) -> Callable[[ObjectOrientedSystem], None]:
-    def _(sys: ObjectOrientedSystem) -> None:
-        sys.send(
-            "this",
-            f"set-{currency}",
-            value=sys.send(
-                sys.send("this", f"get-{currency}"),
-                "add",
-                value=sys.send("args", "get-value"),
-            ),
-        )
-
-    return _
+    return lambda sys: sys.send(
+        "this",
+        f"set-{currency}",
+        value=sys.send(
+            sys.send("this", f"get-{currency}"),
+            "add",
+            value=sys.send("args", "get-value"),
+        ),
+    )
 
 
 deposit_by_dollar = generate_deposit_by_currency("dollars")
