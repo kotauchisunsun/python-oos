@@ -16,7 +16,11 @@ class ObjectOrientedSystem:
             self.environment.define(
                 sys.send("args", "get-name"),
                 sys.send("args", "get", attr="bases", fallback=[]),
-                sys.send("args", "get", attr="attrs", fallback=[]),
+                [
+                    # intの時はintへ持ち替える
+                    type(p)(p.name, self.convert_value(p.value))
+                    for p in sys.send("args", "get", attr="attrs", fallback=[])
+                ],
                 sys.send("args", "get", attr="constructor", fallback=lambda sys: None),
                 sys.send("args", "get", attr="methods", fallback={}),
             )
@@ -74,15 +78,13 @@ class ObjectOrientedSystem:
             elif isinstance(f, PublicMethod):
                 return self.__call(instance, method)
 
-    def instantiate_argv(self, argv: dict[str, MessageType]) -> Instance:
-        _argv = {}
+    def convert_value(self, value: Any) -> Any:
+        if isinstance(value, int):
+            return self.environment.new_tmp_int(value)
+        return value
 
-        for k, v in argv.items():
-            if isinstance(v, int):
-                name = "args_int_%f" % random.random()
-                _argv[k] = self.environment.new_int(name, v)
-            else:
-                _argv[k] = v
+    def instantiate_argv(self, argv: dict[str, MessageType]) -> Instance:
+        _argv = {k: self.convert_value(v) for k, v in argv.items()}
 
         name = "args%f" % random.random()
         self.environment.define(

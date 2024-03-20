@@ -17,9 +17,7 @@ class Environment:
             "int",
             [],
             [PublicAttr("value")],
-            lambda sys: sys.send(
-                "this", "set-value", value=sys.send("args", "get-value")
-            ),
+            lambda sys: None,
             {
                 "add": PublicMethod(
                     lambda sys: self.new_int(
@@ -74,6 +72,9 @@ class Environment:
         instance = self.new("int", name)
         instance.attributes["value"] = value
         return instance
+
+    def new_tmp_int(self, value: int) -> Instance:
+        return self.new_int("int_%f" % random.random(), value)
 
     def get_instance(self, instance_name: str) -> Instance:
         return self.instance_management.get_instance(instance_name)
