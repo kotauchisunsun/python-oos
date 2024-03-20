@@ -23,8 +23,8 @@ class InstanceManagement:
                 return instances[instance_name]
         raise Exception(f"{instance_name} is not defined")
 
-    def push(self):
+    def push(self) -> None:
         self.instances.append({})
 
-    def pop(self):
+    def pop(self) -> None:
         self.instances.pop()

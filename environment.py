@@ -65,7 +65,7 @@ class Environment:
         base_classes = [self.class_definitions.get_class(base) for base in bases]
         self.class_definitions.define(name, base_classes, attrs, constructor, methods)
 
-    def new(self, cls: str, name: str) -> Any:
+    def new(self, cls: str, name: str) -> Instance:
         _class = self.class_definitions.get_class(cls)
         instance = self.instance_management.make_instance(_class, name)
         return instance

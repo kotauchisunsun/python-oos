@@ -12,7 +12,7 @@ class ObjectOrientedSystem:
     def __init__(self) -> None:
         self.environment = Environment()
 
-        def define(sys: ObjectOrientedSystem):
+        def define(sys: ObjectOrientedSystem) -> None:
             self.environment.define(
                 sys.send("args", "get-name"),
                 sys.send("args", "get", attr="bases", fallback=[]),
@@ -21,7 +21,7 @@ class ObjectOrientedSystem:
                 sys.send("args", "get", attr="methods", fallback={}),
             )
 
-        def new(sys: ObjectOrientedSystem):
+        def new(sys: ObjectOrientedSystem) -> Instance:
             cls = sys.send("args", "get-cls")
             name = sys.send("args", "get-name")
 
@@ -74,7 +74,7 @@ class ObjectOrientedSystem:
             elif isinstance(f, PublicMethod):
                 return self.__call(instance, method)
 
-    def instantiate_argv(self, argv):
+    def instantiate_argv(self, argv: dict[str, MessageType]) -> Instance:
         _argv = {}
 
         for k, v in argv.items():
