@@ -30,9 +30,11 @@ class ObjectOrientedSystem:
             name = sys.send("args", "get-name")
 
             if cls == "int":
-                return self.environment.new_int(
-                    name, sys.send(sys.send("args", "get-value"), "get-value")
+                instance = self.environment.new_tmp_int(
+                    sys.send(sys.send("args", "get-value"), "get-value")
                 )
+                self.environment.register_instance(name, instance)
+                return instance
 
             instance = self.environment.new(cls, name)
 

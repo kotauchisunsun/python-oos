@@ -20,29 +20,25 @@ class Environment:
             lambda sys: None,
             {
                 "add": PublicMethod(
-                    lambda sys: self.new_int(
-                        "int_%f" % random.random(),
+                    lambda sys: self.new_tmp_int(
                         sys.send("this", "get-value")
                         + sys.send(sys.send("args", "get-value"), "get-value"),
                     )
                 ),
                 "sub": PublicMethod(
-                    lambda sys: self.new_int(
-                        "int_%f" % random.random(),
+                    lambda sys: self.new_tmp_int(
                         sys.send("this", "get-value")
                         - sys.send(sys.send("args", "get-value"), "get-value"),
                     )
                 ),
                 "multiply": PublicMethod(
-                    lambda sys: self.new_int(
-                        "int_%f" % random.random(),
+                    lambda sys: self.new_tmp_int(
                         sys.send("this", "get-value")
                         * sys.send(sys.send("args", "get-value"), "get-value"),
                     )
                 ),
                 "max": PublicMethod(
-                    lambda sys: self.new_int(
-                        "int_%f" % random.random(),
+                    lambda sys: self.new_tmp_int(
                         max(
                             sys.send("this", "get-value"),
                             sys.send(sys.send("args", "get-value"), "get-value"),
@@ -68,13 +64,11 @@ class Environment:
         instance = self.instance_management.make_instance(_class, name)
         return instance
 
-    def new_int(self, name: str, value: int) -> Instance:
-        instance = self.new("int", name)
+    def new_tmp_int(self, value: int) -> Instance:
+        int_cls = self.class_definitions.get_class("int")
+        instance = Instance.new_from_class(int_cls)
         instance.attributes["value"] = value
         return instance
-
-    def new_tmp_int(self, value: int) -> Instance:
-        return self.new_int("int_%f" % random.random(), value)
 
     def get_instance(self, instance_name: str) -> Instance:
         return self.instance_management.get_instance(instance_name)
