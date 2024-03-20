@@ -48,13 +48,11 @@ class ObjectOrientedSystem:
         if instance_name == "env":
             _argv = self.instantiate_argv(argv)
             self.environment.register_instance("args", _argv)
-
             return self.__call(instance, method)
 
         with self.environment:
             _argv = self.instantiate_argv(argv)
             self.environment.register_instance("args", _argv)
-
             self.environment.register_instance("this", instance)
             if instance_name == "this":
                 return self.__call(instance, method)
