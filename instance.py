@@ -42,11 +42,11 @@ def build_getter_setter(
 ) -> tuple[MethodType, MethodType]:
     from oos import ObjectOrientedSystem as System
 
-    def getter(sys: System, **args: dict[str, Any]) -> Any:
+    def getter(sys: System) -> Any:
         return this.attributes[attr.name]
 
-    def setter(sys: System, **args: dict[str, Any]) -> None:
-        this.attributes[attr.name] = args["value"]
+    def setter(sys: System) -> None:
+        this.attributes[attr.name] = sys.send("args", "get-value")
 
     table: dict[type[AttrType], tuple[type[MethodType], type[MethodType]]] = {
         PublicAttr: (PublicMethod, PublicMethod),

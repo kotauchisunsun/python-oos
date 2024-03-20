@@ -1,3 +1,4 @@
+import random
 from attr_accessor import PublicAttr
 from environment import Environment
 from method_accessor import PublicMethod, PrivateMethod
@@ -11,32 +12,30 @@ class ObjectOrientedSystem:
     def __init__(self) -> None:
         self.environment = Environment()
 
-        def define(sys: ObjectOrientedSystem, **argv: Any):
+        def define(sys: ObjectOrientedSystem):
             self.environment.define(
-                argv["name"],
-                argv.get("bases", []),
-                argv.get("attrs", []),
-                argv.get("constructor", lambda sys, **args: None),
-                argv.get("methods", []),
+                sys.send("args", "get-name"),
+                sys.send("args", "get", attr="bases", fallback=[]),
+                sys.send("args", "get", attr="attrs", fallback=[]),
+                sys.send("args", "get", attr="constructor", fallback=lambda sys: None),
+                sys.send("args", "get", attr="methods", fallback={}),
             )
 
-        def new(sys: ObjectOrientedSystem, **argv: Any):
-            cls = argv["cls"]
-            name = argv["name"]
-            del argv["cls"]
-            del argv["name"]
-            instance = self.environment.new(cls, name, **argv)
+        def new(sys: ObjectOrientedSystem):
+            cls = sys.send("args", "get-cls")
+            name = sys.send("args", "get-name")
+            instance = self.environment.new(cls, name)
 
             with self.environment:
                 self.environment.register_instance("this", instance)
-                instance.class_type.constructor(self, **argv)
+                instance.class_type.constructor(self)
                 return instance
 
         self.environment.define(
             "environment",
             [],
             [],
-            lambda sys, **args: None,
+            lambda sys: None,
             {"define": PublicMethod(define), "new": PublicMethod(new)},
         )
 
@@ -55,19 +54,40 @@ class ObjectOrientedSystem:
         instance = self.environment.get_instance(instance_name)
 
         if instance_name == "env":
-            return self.__call(instance, method, **argv)
+            _argv = self.instantiate_argv(argv)
+            self.environment.register_instance("args", _argv)
+            return self.__call(instance, method)
 
         with self.environment:
+            _argv = self.instantiate_argv(argv)
+            self.environment.register_instance("args", _argv)
             self.environment.register_instance("this", instance)
             if instance_name == "this":
-                return self.__call(instance, method, **argv)
+                return self.__call(instance, method)
 
             f = instance.get_method(method)
             if isinstance(f, PrivateMethod):
                 raise MethodAccessDenied(f"{method} is PrivateMethod")
             elif isinstance(f, PublicMethod):
-                return self.__call(instance, method, **argv)
+                return self.__call(instance, method)
 
-    def __call(self, instance: Instance, method: str, **argv: MessageType) -> Any:
+    def instantiate_argv(self, argv):
+        name = "args%f" % random.random()
+        self.environment.define(
+            name,
+            [],
+            [PublicAttr(k, v) for k, v in argv.items()],
+            lambda sys: None,
+            {
+                "get": PublicMethod(
+                    lambda sys: sys.send("this", "get-" + sys.send("args", "get-attr"))
+                    if sys.send("args", "get-attr") in argv
+                    else sys.send("args", "get-fallback")
+                ),
+            },
+        )
+        return self.environment.new(name, "args")
+
+    def __call(self, instance: Instance, method: str) -> Any:
         f = instance.get_method(method)
-        return f.method(self, **argv)
+        return f.method(self)
