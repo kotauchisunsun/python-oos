@@ -74,8 +74,8 @@ class ObjectOrientedSystem:
                 return self.__call(instance, method)
 
     def convert_value(self, value: Any) -> Any:
-        if isinstance(value, int):
-            return self.environment.new_tmp_int(value)
+        if self.environment.is_primitive(value):
+            return self.environment.new_tmp_primitive(value)
         return value
 
     def instantiate_argv(self, argv: dict[str, MessageType]) -> Instance:

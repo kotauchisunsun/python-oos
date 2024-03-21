@@ -55,6 +55,25 @@ def test_int_add_vars() -> None:
     assert system.send("x", "add", value="y").value() == 15
 
 
+def test_float() -> None:
+    system = ObjectOrientedSystem()
+    system.send("env", "new", cls="float", name="x", value=10.5)
+    assert system.send("x", "get-value") == 10.5
+
+
+def test_float_add() -> None:
+    system = ObjectOrientedSystem()
+    system.send("env", "new", cls="float", name="x", value=10.5)
+    assert system.send("x", "add", value=5.5).value() == 16.0
+
+
+def test_float_add_vars() -> None:
+    system = ObjectOrientedSystem()
+    system.send("env", "new", cls="float", name="x", value=10.5)
+    system.send("env", "new", cls="float", name="y", value=5.5)
+    assert system.send("x", "add", value="y").value() == 16.0
+
+
 def test_attr() -> None:
     system = ObjectOrientedSystem()
     system.send(
