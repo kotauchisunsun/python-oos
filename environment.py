@@ -14,8 +14,10 @@ class Environment:
 
         self.primitive_types = [int, float]
 
+        define_primitive(self)
+
         for t in self.primitive_types:
-            define_primitive(self, t)
+            define_primitive_type(self, t)
 
     def is_primitive(self, value: Any) -> bool:
         return any(isinstance(value, t) for t in self.primitive_types)
@@ -55,10 +57,26 @@ class Environment:
         self.instance_management.pop()
 
 
-def define_primitive(env: Environment, cls: type) -> None:
+def define_primitive(env: Environment):
+    env.define(
+        "primitive",
+        [],
+        [PublicAttr("value")],
+        lambda sys: None,
+        {
+            "set-value": PublicMethod(
+                lambda sys: sys.environment.get_instance("this").attributes.update(
+                    value=sys.send(sys.send("args", "get-value"), "get-value")
+                )
+            ),
+        },
+    )
+
+
+def define_primitive_type(env: Environment, cls: type) -> None:
     env.define(
         cls.__name__,
-        [],
+        ["primitive"],
         [PublicAttr("value")],
         lambda sys: sys.send("this", "set-value", value=sys.send("args", "get-value")),
         {
@@ -86,11 +104,6 @@ def define_primitive(env: Environment, cls: type) -> None:
                         sys.send("this", "get-value"),
                         sys.send(sys.send("args", "get-value"), "get-value"),
                     ),
-                )
-            ),
-            "set-value": PublicMethod(
-                lambda sys: sys.environment.get_instance("this").attributes.update(
-                    value=sys.send(sys.send("args", "get-value"), "get-value")
                 )
             ),
         },
