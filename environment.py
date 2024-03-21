@@ -17,7 +17,9 @@ class Environment:
             "int",
             [],
             [PublicAttr("value")],
-            lambda sys: None,
+            lambda sys: sys.send(
+                "this", "set-value", value=sys.send("args", "get-value")
+            ),
             {
                 "add": PublicMethod(
                     lambda sys: self.new_tmp_int(
@@ -43,6 +45,11 @@ class Environment:
                             sys.send("this", "get-value"),
                             sys.send(sys.send("args", "get-value"), "get-value"),
                         ),
+                    )
+                ),
+                "set-value": PublicMethod(
+                    lambda sys: sys.environment.get_instance("this").attributes.update(
+                        value=sys.send(sys.send("args", "get-value"), "get-value")
                     )
                 ),
             },
