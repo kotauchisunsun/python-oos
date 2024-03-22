@@ -1,3 +1,4 @@
+import operator
 from typing import Any
 from attr_accessor import AttrType, PublicAttr
 from class_definitions import ClassConstructor, MessageType
@@ -82,20 +83,26 @@ def define_primitive_type(env: Environment, cls: type) -> None:
         {
             "add": PublicMethod(
                 lambda sys: env.new_tmp_primitive(
-                    sys.send("this", "get-value")
-                    + sys.send(sys.send("args", "get-value"), "get-value"),
+                    operator.add(
+                        sys.send("this", "get-value"),
+                        sys.send(sys.send("args", "get-value"), "get-value"),
+                    )
                 )
             ),
             "sub": PublicMethod(
                 lambda sys: env.new_tmp_primitive(
-                    sys.send("this", "get-value")
-                    - sys.send(sys.send("args", "get-value"), "get-value"),
+                    operator.sub(
+                        sys.send("this", "get-value"),
+                        sys.send(sys.send("args", "get-value"), "get-value"),
+                    )
                 )
             ),
             "multiply": PublicMethod(
                 lambda sys: env.new_tmp_primitive(
-                    sys.send("this", "get-value")
-                    * sys.send(sys.send("args", "get-value"), "get-value"),
+                    operator.mul(
+                        sys.send("this", "get-value"),
+                        sys.send(sys.send("args", "get-value"), "get-value"),
+                    )
                 )
             ),
             "max": PublicMethod(
@@ -103,7 +110,7 @@ def define_primitive_type(env: Environment, cls: type) -> None:
                     max(
                         sys.send("this", "get-value"),
                         sys.send(sys.send("args", "get-value"), "get-value"),
-                    ),
+                    )
                 )
             ),
         },
