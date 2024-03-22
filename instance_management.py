@@ -9,10 +9,8 @@ class InstanceManagement:
     ) -> None:
         self.instances: list[dict[str, Instance]] = [{}]
 
-    def make_instance(
-        self, _class: Class, instance_name: str, **argv: dict[str, Any]
-    ) -> Instance:
-        instance = Instance(_class, instance_name, _class.get_default_attr())
+    def make_instance(self, _class: Class, instance_name: str) -> Instance:
+        instance = Instance.new_from_class(_class)
         self.instances[-1][instance_name] = instance
         return instance
 
@@ -25,8 +23,8 @@ class InstanceManagement:
                 return instances[instance_name]
         raise Exception(f"{instance_name} is not defined")
 
-    def push(self):
+    def push(self) -> None:
         self.instances.append({})
 
-    def pop(self):
+    def pop(self) -> None:
         self.instances.pop()

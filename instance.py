@@ -1,21 +1,25 @@
 from attr_accessor import AttrType, PrivateAttr, PublicAttr, ReadonlyAttr
 from class_definitions import Class, ClassInterface
 from typing import Any, Iterable
+from exceptions import MethodNotFound
 from method_accessor import MethodType, PrivateMethod, PublicMethod
 
 
 class Instance:
-    def __init__(
-        self, class_type: Class, name: str, attributes: dict[str, Any]
-    ) -> None:
+    def __init__(self, class_type: Class, attributes: dict[str, Any]) -> None:
         self.class_type = class_type
-        self.name = name
         self.attributes = attributes
 
     def get_method(self, name: str) -> Any:
+        for f in self.class_type.find_method(name):
+            return f
         for f in find_attr_functions(self, self.class_type, name):
             return f
-        return self.class_type.get_method(name)
+        raise MethodNotFound(name)
+
+    @staticmethod
+    def new_from_class(class_type: Class) -> "Instance":
+        return Instance(class_type, class_type.get_default_attr())
 
 
 def find_attr_functions(
